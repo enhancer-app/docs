@@ -1,0 +1,67 @@
+---
+title: FAQ
+description: Frequently asked questions about Enhancer.
+---
+
+## Is Enhancer really free?
+
+Yes, Enhancer is completely free and always will be.
+
+We created Enhancer to supplement streaming platforms with valuable features we
+feel are missing. Our philosophy is simple: if the platform had built these
+features itself, they would have been part of the free, standard experience.
+Therefore, we are committed to keeping Enhancer free for everyone.
+
+## How does "Chatters" work?
+
+The "Chatters" count is the number you typically see on the right (often in
+brackets) next to the standard Twitch viewer count.
+
+First, it is very important to understand that this is not a "real viewer
+count."
+
+This number represents the total count of unique users who are logged into a
+Twitch account and currently connected to that specific stream's chat room.
+It's important to understand that this count isn't just "active viewers" and
+can include:
+
+- Logged-in users who are actively watching the stream.
+- Common chat bots (like StreamElements, WZBot, Nightbot, etc.), as they are
+  connected as users.
+- Individuals who might have the stream's chat open (e.g., in a separate window
+  or on a mobile device) but aren't actively watching the video player itself.
+
+### Where does this number come from?
+
+This is a crucial point: **we do not calculate this number ourselves.** We are
+displaying the data directly from the official Twitch API. The API provides a
+specific endpoint that returns the exact count of unique accounts connected to
+the stream's chat.
+
+### Why is it different from the standard "Viewer" count?
+
+You will often notice a difference between the official Twitch viewer count (on
+the left) and our "Chatters" count (on the right).
+
+- The Twitch Viewer Count is Twitch's own metric. They use complex algorithms
+  to count what they consider a "real viewer," and this system is also designed
+  to filter out view bots. We have received reports that this number has seemed
+  lower after Twitch announced their intensified fight against bots. It's
+  possible (though unconfirmed) that their filtering algorithms are now also
+  accidentally filtering some real viewers from the count.
+- The Chatters Count is simply the raw number of accounts in the chat room, as
+  reported by the API.
+
+This comparison is one of the only methods available to external tools to get
+an indication of a stream's chat health. For example, a large difference
+between the two numbers can sometimes suggest the presence of view bots that
+are not logged into accounts (and therefore not connected to chat).
+
+### How accurate is this number?
+
+The "Chatters" count is not 100% accurate as a "real viewer" metric. It can
+still be manipulated. For example, someone could create bot accounts that do
+nothing but connect to the chat to inflate this number.
+
+However, for most channels, this number provides a solid and realistic
+estimation of how many logged-in users are currently connected to the stream.
