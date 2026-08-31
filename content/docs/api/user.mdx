@@ -1,0 +1,140 @@
+---
+title: User Profile
+description: GET /v1/user/:platform/:externalId
+---
+
+Returns a user's public profile: a `global` bucket plus per-channel buckets,
+each containing the user's badges and appearance (custom nickname, custom
+font, glow).
+
+## Endpoint
+
+```http
+GET https://api.enhancer.at/v1/user/:platform/:externalId
+```
+
+| Parameter    | In    | Description                                          |
+| ------------ | ----- | ---------------------------------------------------- |
+| `platform`   | path  | Platform name: `TWITCH` or `KICK`                     |
+| `externalId` | path  | User external id or login                             |
+
+| Query parameter | Type      | Default | Description                    |
+| --------------- | --------- | ------- | ------------------------------ |
+| `page`          | `integer` | `0`     | Zero-based channels page       |
+| `pageSize`      | `integer` | `50`    | Channels per page (1 to 100)   |
+
+## Example
+
+```bash
+curl https://api.enhancer.at/v1/user/twitch/igorovh
+```
+
+**Response `200`:**
+
+```json
+{
+  "platform": "TWITCH",
+  "accountId": "a1b85243-288d-4022-912e-7e76a49be380",
+  "externalId": "87037696",
+  "login": "igorovh",
+  "displayName": "igorovh",
+  "global": {
+    "badges": [
+      {
+        "badgeId": "bb90ca1c-52ed-4fc4-a9ab-4274c8b9c394",
+        "sources": {
+          "18x18": "https://cdn.enhancer.at/badge/cb6c86dff215a947125119363ae7f74498b3a570f43531d64487166f8ea71052/18.webp",
+          "36x36": "https://cdn.enhancer.at/badge/cb6c86dff215a947125119363ae7f74498b3a570f43531d64487166f8ea71052/36.webp",
+          "72x72": "https://cdn.enhancer.at/badge/cb6c86dff215a947125119363ae7f74498b3a570f43531d64487166f8ea71052/72.webp"
+        },
+        "name": "Enhancer Developer",
+        "description": "Enhancer Developer",
+        "priority": 999
+      }
+    ],
+    "appearance": {
+      "customNickname": "igor",
+      "customFont": null,
+      "hasGlow": true
+    }
+  },
+  "channels": [
+    {
+      "channelExternalId": "142600211",
+      "channelLogin": "veniakk",
+      "badges": [
+        {
+          "badgeId": "5ca045cb-a34d-4476-8ef0-c59b93f07e44",
+          "sources": {
+            "18x18": "https://cdn.enhancer.at/badge/530675f086bb94487af393046efdfb22e372ece88114554d85be14b3ef974df6/18.webp",
+            "36x36": "https://cdn.enhancer.at/badge/530675f086bb94487af393046efdfb22e372ece88114554d85be14b3ef974df6/36.webp",
+            "72x72": "https://cdn.enhancer.at/badge/530675f086bb94487af393046efdfb22e372ece88114554d85be14b3ef974df6/72.webp"
+          },
+          "name": "veniak test",
+          "description": "",
+          "priority": 0
+        }
+      ],
+      "appearance": {
+        "customNickname": "igor ツ",
+        "customFont": null,
+        "hasGlow": true
+      }
+    },
+    {
+      "channelExternalId": "87037696",
+      "channelLogin": "igorovh",
+      "badges": [
+        {
+          "badgeId": "369e214b-21af-4141-981d-3cfd73fb6ff9",
+          "sources": {
+            "18x18": "https://cdn.enhancer.at/badge/090ad1e173cb0e1235cecff4d7ececa29bd6be7d9d8b29574b908c5f708254fa/18.webp",
+            "36x36": "https://cdn.enhancer.at/badge/090ad1e173cb0e1235cecff4d7ececa29bd6be7d9d8b29574b908c5f708254fa/36.webp",
+            "72x72": "https://cdn.enhancer.at/badge/090ad1e173cb0e1235cecff4d7ececa29bd6be7d9d8b29574b908c5f708254fa/72.webp"
+          },
+          "name": "Meowl Test",
+          "description": "kozak test na prodzie cnie",
+          "priority": 0
+        },
+        {
+          "badgeId": "7f12fbc9-25cb-4eb9-8eb3-7a115b398521",
+          "sources": {
+            "18x18": "https://cdn.enhancer.at/badge/f0902c06018ca8938610583305e06d1bf0e9ef5d47cc25dbc555f918a2cfe577/18.webp",
+            "36x36": "https://cdn.enhancer.at/badge/f0902c06018ca8938610583305e06d1bf0e9ef5d47cc25dbc555f918a2cfe577/36.webp",
+            "72x72": "https://cdn.enhancer.at/badge/f0902c06018ca8938610583305e06d1bf0e9ef5d47cc25dbc555f918a2cfe577/72.webp"
+          },
+          "name": "test2",
+          "description": "test2",
+          "priority": 0
+        }
+      ],
+      "appearance": null
+    }
+  ],
+  "page": 0,
+  "hasNextPage": false
+}
+```
+
+Response notes:
+
+- `channels[]` contains one entry per channel where the user has at least one
+  badge or appearance, sorted by `channelExternalId`.
+- Effective appearance per channel falls back to `global.appearance` when a
+  channel entry has `appearance: null`.
+- Pagination applies to `channels[]` only; `global` is always complete. Iterate
+  with `page` until `hasNextPage` is `false`.
+- Responses are not cached (`Cache-Control: no-store`).
+
+## Errors
+
+| Status | Meaning            |
+| ------ | ------------------ |
+| `400`  | Invalid parameters |
+| `404`  | User not found     |
+
+Error responses use a shared shape:
+
+```json
+{ "error": { "code": "string", "message": "string" } }
+```

@@ -1,0 +1,5 @@
+{
+  "title": "Public API",
+  "defaultOpen": true,
+  "pages": ["aggregate", "user"]
+}

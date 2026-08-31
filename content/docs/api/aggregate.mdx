@@ -1,0 +1,91 @@
+---
+title: Channel Aggregate
+description: GET /v1/channel/:platform/:externalId/aggregate
+---
+
+Returns the aggregated state of a channel: the accounts assigned to it with
+their badge assignments and appearance, the badge definitions, and a replay
+cursor for the public WebSocket stream.
+
+## Endpoint
+
+```http
+GET https://api.enhancer.at/v1/channel/:platform/:externalId/aggregate
+```
+
+| Parameter   | In   | Description                                                     |
+| ----------- | ---- | --------------------------------------------------------------- |
+| `platform`  | path | Platform name: `TWITCH` or `KICK`                                |
+| `externalId`| path | Channel external id or login. Use `global` for the global aggregate. |
+
+## Example
+
+```bash
+curl https://api.enhancer.at/v1/channel/twitch/igorovh/aggregate
+```
+
+**Response `200`:**
+
+```json
+{
+  "channelId": "a1b85243-288d-4022-912e-7e76a49be380",
+  "platform": "TWITCH",
+  "accounts": [
+    {
+      "accountId": "a1b85243-288d-4022-912e-7e76a49be380",
+      "externalId": "87037696",
+      "badgesIds": [
+        "369e214b-21af-4141-981d-3cfd73fb6ff9",
+        "7f12fbc9-25cb-4eb9-8eb3-7a115b398521"
+      ],
+      "customNickname": "igor",
+      "customFont": null,
+      "hasGlow": true
+    }
+  ],
+  "badges": [
+    {
+      "badgeId": "369e214b-21af-4141-981d-3cfd73fb6ff9",
+      "sources": {
+        "18x18": "https://cdn.enhancer.at/badge/090ad1e173cb0e1235cecff4d7ececa29bd6be7d9d8b29574b908c5f708254fa/18.webp",
+        "36x36": "https://cdn.enhancer.at/badge/090ad1e173cb0e1235cecff4d7ececa29bd6be7d9d8b29574b908c5f708254fa/36.webp",
+        "72x72": "https://cdn.enhancer.at/badge/090ad1e173cb0e1235cecff4d7ececa29bd6be7d9d8b29574b908c5f708254fa/72.webp"
+      },
+      "name": "Meowl Test",
+      "priority": 0
+    },
+    {
+      "badgeId": "7f12fbc9-25cb-4eb9-8eb3-7a115b398521",
+      "sources": {
+        "18x18": "https://cdn.enhancer.at/badge/f0902c06018ca8938610583305e06d1bf0e9ef5d47cc25dbc555f918a2cfe577/18.webp",
+        "36x36": "https://cdn.enhancer.at/badge/f0902c06018ca8938610583305e06d1bf0e9ef5d47cc25dbc555f918a2cfe577/36.webp",
+        "72x72": "https://cdn.enhancer.at/badge/f0902c06018ca8938610583305e06d1bf0e9ef5d47cc25dbc555f918a2cfe577/72.webp"
+      },
+      "name": "test2",
+      "priority": 0
+    }
+  ],
+  "cursor": "1787259545448-0"
+}
+```
+
+Notes:
+
+- `channelId` is `null` for the `global` aggregate.
+- `cursor` is the starting point for WebSocket replay, see the sync stream at
+  `/v1/ws`.
+- Responses carry an `ETag` header; send it as `If-None-Match` to receive
+  `304 Not Modified` when nothing changed.
+
+## Errors
+
+| Status | Meaning              |
+| ------ | -------------------- |
+| `400`  | Invalid parameters   |
+| `404`  | Channel not found    |
+
+Error responses use a shared shape:
+
+```json
+{ "error": { "code": "string", "message": "string" } }
+```
