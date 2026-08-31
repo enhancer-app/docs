@@ -1,0 +1,5 @@
+{
+  "title": "General",
+  "defaultOpen": true,
+  "pages": ["installation", "faq"]
+}
