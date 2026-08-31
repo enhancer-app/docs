@@ -1,5 +1,5 @@
 ---
-title: Channel Aggregate
+title: Channel
 description: GET /v1/channel/:platform/:externalId/aggregate
 ---
 
@@ -24,7 +24,7 @@ GET https://api.enhancer.at/v1/channel/:platform/:externalId/aggregate
 curl https://api.enhancer.at/v1/channel/twitch/h2p_gucio/aggregate
 ```
 
-**Response `200` (illustrative):**
+**Response `200`:**
 
 ```json
 {
@@ -52,9 +52,9 @@ curl https://api.enhancer.at/v1/channel/twitch/h2p_gucio/aggregate
     {
       "badgeId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
       "sources": {
-        "18x18": "https://cdn.enhancer.at/badge/cb6c86dff215a947125119363ae7f74498b3a570f43531d64487166f8ea71052/18.webp",
-        "36x36": "https://cdn.enhancer.at/badge/cb6c86dff215a947125119363ae7f74498b3a570f43531d64487166f8ea71052/36.webp",
-        "72x72": "https://cdn.enhancer.at/badge/cb6c86dff215a947125119363ae7f74498b3a570f43531d64487166f8ea71052/72.webp"
+        "18x18": "https://cdn.enhancer.at/badge/[...sha256...]/18.webp",
+        "36x36": "https://cdn.enhancer.at/badge/[...sha256...]/36.webp",
+        "72x72": "https://cdn.enhancer.at/badge/[...sha256...]/72.webp"
       },
       "name": "Enhancer Developer",
       "priority": 999
@@ -62,9 +62,9 @@ curl https://api.enhancer.at/v1/channel/twitch/h2p_gucio/aggregate
     {
       "badgeId": "b3d26f1a-8e4f-4c7a-9d21-6f5a8b9c0d12",
       "sources": {
-        "18x18": "https://cdn.enhancer.at/badge/d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5/18.webp",
-        "36x36": "https://cdn.enhancer.at/badge/d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5/36.webp",
-        "72x72": "https://cdn.enhancer.at/badge/d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5/72.webp"
+        "18x18": "https://cdn.enhancer.at/badge/[...sha256...]/18.webp",
+        "36x36": "https://cdn.enhancer.at/badge/[...sha256...]/36.webp",
+        "72x72": "https://cdn.enhancer.at/badge/[...sha256...]/72.webp"
       },
       "name": "Contributor",
       "priority": 10
