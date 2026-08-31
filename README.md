@@ -1,6 +1,6 @@
 # Enhancer Docs
 
-Public documentation for **Enhancer** — a free browser extension that
+Public documentation for **Enhancer**, a free browser extension that
 supplements streaming platforms with valuable features.
 
 Built with [Fumadocs](https://fumadocs.dev), deployed to GitHub Pages:

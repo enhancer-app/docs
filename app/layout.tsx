@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Provider } from '@/components/provider';
 import './global.css';
@@ -11,10 +11,14 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://enhancer-app.github.io'),
   title: {
     default: 'Enhancer Docs',
-    template: '%s — Enhancer Docs',
+    template: '%s - Enhancer Docs',
   },
   description:
-    'Documentation for Enhancer — a free browser extension that supplements streaming platforms with valuable features.',
+    'Documentation for Enhancer, a free browser extension that supplements streaming platforms with valuable features.',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#9147FF',
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {
