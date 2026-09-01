@@ -4,7 +4,7 @@ Public documentation for **Enhancer**, a free browser extension that
 supplements streaming platforms with valuable features.
 
 Built with [Fumadocs](https://fumadocs.dev), deployed to Cloudflare Pages:
-<https://enhancer-docs.pages.dev/>
+[docs.enhancer.at](https://docs.enhancer.at)
 
 ## Development
 
