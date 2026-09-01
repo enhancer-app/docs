@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "next build && node scripts/fix-rsc-paths.mjs",
+    "build": "next build && node scripts/fix-rsc-paths.mjs && rm -rf dist && mv out dist",
     "dev": "next dev",
-    "types:check": "next typegen && tsc --noEmit"
+    "types:check": "next typegen && tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "postinstall": "fumadocs-mdx",
   "dependencies": {
