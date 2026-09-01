@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://enhancer-app.github.io'),
+  metadataBase: new URL('https://enhancer-docs.pages.dev'),
   title: {
     default: 'Enhancer Docs',
     template: '%s - Enhancer Docs',

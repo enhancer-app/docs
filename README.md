@@ -3,8 +3,8 @@
 Public documentation for **Enhancer**, a free browser extension that
 supplements streaming platforms with valuable features.
 
-Built with [Fumadocs](https://fumadocs.dev), deployed to GitHub Pages:
-<https://enhancer-app.github.io/docs/>
+Built with [Fumadocs](https://fumadocs.dev), deployed to Cloudflare Pages:
+<https://enhancer-docs.pages.dev/>
 
 ## Development
 
