@@ -1,0 +1,187 @@
+---
+title: Emotes
+description: GET /v1/global/emotes, GET /v1/channel/:channel/emotes and related endpoints
+---
+
+Returns Twitch, 7TV, BetterTTV, FrankerFaceZ and native Kick emotes for a
+channel or for the global (shared) emote pool. Every emote carries
+provider-native URLs, so no extra requests are needed to render it.
+
+## Endpoints
+
+```http
+GET https://emotes-api.enhancer.at/v1/global/emotes
+GET https://emotes-api.enhancer.at/v1/channel/:channel/emotes
+GET https://emotes-api.enhancer.at/v1/channel/:channel/id
+GET https://emotes-api.enhancer.at/proxy/:provider/:id/:size
+```
+
+| Parameter | In   | Description                                                                 |
+| --------- | ---- | --------------------------------------------------------------------------- |
+| `channel` | path | Channel login (e.g. `furazek`), resolved on both platforms                   |
+| `provider`| path | Proxy only: `twitch`, `7tv`, `bttv`, `ffz` or `kick`                        |
+| `id`      | path | Proxy only: provider-native emote id                                         |
+| `size`    | path | Proxy only: image size, one of `1x`, `2x`, `3x`, `4x`                        |
+
+| Query parameter | Type     | Default | Description                                                        |
+| --------------- | -------- | ------- | ------------------------------------------------------------------ |
+| `platform`      | `string` | `all`   | `twitch`, `kick` or `all`                                          |
+| `provider`      | `string` | `all`   | `twitch`, `7tv`, `bttv`, `ffz`, `kick` or `all`                    |
+
+Provider combinations are validated per platform: Twitch supports `twitch`,
+`7tv`, `bttv` and `ffz`; Kick supports `kick` and `7tv`.
+
+## Example
+
+```bash
+curl 'https://emotes-api.enhancer.at/v1/channel/furazek/emotes'
+curl 'https://emotes-api.enhancer.at/v1/channel/furazek/emotes?platform=twitch&provider=7tv'
+curl 'https://emotes-api.enhancer.at/v1/global/emotes?platform=kick&provider=all'
+curl 'https://emotes-api.enhancer.at/v1/channel/furazek/id?platform=all'
+```
+
+**Response `200` (`/v1/channel/:channel/emotes`):**
+
+The response is a platform/provider matrix containing only the requested
+platforms and providers.
+
+```json
+{
+  "twitch": {
+    "twitch": [
+      {
+        "id": "emotesv2_abc123",
+        "provider": "twitch",
+        "code": "Kappa",
+        "urls": [
+          { "size": "1x", "url": "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_abc123/default/dark/1.0" },
+          { "size": "2x", "url": "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_abc123/default/dark/2.0" },
+          { "size": "3x", "url": "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_abc123/default/dark/3.0" }
+        ]
+      }
+    ],
+    "7tv": [
+      {
+        "id": "01EZPH3FHR000C438200A44F11",
+        "provider": "7tv",
+        "code": "TriKool",
+        "urls": [
+          { "size": "1x", "url": "https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/1x.webp" },
+          { "size": "2x", "url": "https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/2x.webp" },
+          { "size": "3x", "url": "https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/3x.webp" },
+          { "size": "4x", "url": "https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/4x.webp" }
+        ]
+      }
+    ],
+    "bttv": [],
+    "ffz": []
+  },
+  "kick": {
+    "kick": [
+      {
+        "id": "3753119",
+        "provider": "kick",
+        "code": "asmonSmash",
+        "urls": [
+          { "size": "1x", "url": "https://files.kick.com/emotes/3753119/fullsize" }
+        ]
+      }
+    ],
+    "7tv": []
+  }
+}
+```
+
+**Response `200` (`/v1/channel/:channel/id`):**
+
+```json
+{
+  "twitch": {
+    "platform": "twitch",
+    "id": "89709140",
+    "login": "furazek",
+    "displayName": "FURAZEK",
+    "avatar": "https://static-cdn.jtvnw.net/jtv_user_pictures/[...]/profile_image-300x300.png"
+  },
+  "kick": {
+    "platform": "kick",
+    "id": "7420559",
+    "login": "furazek",
+    "displayName": "furazek",
+    "avatar": "https://files.kick.com/images/user/7420559/profile_image/[...]-fullsize.webp"
+  }
+}
+```
+
+## Response fields
+
+**`emotes[]` item (all collection endpoints):**
+
+| Field     | Type       | Description                                                        |
+| --------- | ---------- | ------------------------------------------------------------------ |
+| `id`      | `string`   | Provider-native emote id, always a string to avoid precision loss   |
+| `provider`| `string`   | `twitch`, `7tv`, `bttv`, `ffz` or `kick`                           |
+| `code`    | `string`   | Emote code as used in chat                                          |
+| `urls`    | `object[]` | Available image sizes, each `{ size, url }`                         |
+
+**`/v1/channel/:channel/id` item:**
+
+| Field         | Type     | Description                          |
+| ------------- | -------- | ------------------------------------ |
+| `platform`    | `string` | `twitch` or `kick`                   |
+| `id`          | `string` | Platform-native channel id           |
+| `login`       | `string` | Channel login                        |
+| `displayName` | `string` | Channel display name                 |
+| `avatar`      | `string` | Profile image URL                    |
+
+## Emote proxy
+
+The proxy does not need a channel or emote code — a provider, native emote id
+and size are enough. It responds with a `307` redirect to the provider CDN and
+a `Cache-Control` header. Twitch, 7TV and BetterTTV URLs are generated
+directly; FFZ and Kick URLs are resolved from the cached provider response, so
+an unknown mapping returns `404`.
+
+```bash
+curl -I 'https://emotes-api.enhancer.at/proxy/7tv/01EZPH3FHR000C438200A44F11/2x'
+curl -I 'https://emotes-api.enhancer.at/proxy/twitch/emotesv2_abc123/3x'
+curl -I 'https://emotes-api.enhancer.at/proxy/kick/3753119/1x'
+```
+
+```http
+HTTP/2 307
+Location: https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/2x.webp
+Cache-Control: public, max-age=86400, no-transform
+```
+
+## Notes
+
+- Twitch global emotes come from Twitch's public web GraphQL endpoint; no
+  Twitch OAuth is involved.
+- 7TV resolves the active 7TV connection for the requested platform.
+- BetterTTV and FrankerFaceZ are available only for Twitch.
+- Native Kick emotes use provider `kick` and are never reported as 7TV emotes.
+- A failing provider never breaks the whole response — it contributes an empty
+  array (Kick can block requests from some environments).
+- A channel that does not resolve on any platform yields empty per-platform
+  objects with `200` instead of an error.
+- Responses are cached; `/v1/channel/:channel/id` is served with
+  `Cache-Control: public, max-age=604800`.
+
+## Errors
+
+| Status | Code             | Meaning                                                   |
+| ------ | ---------------- | --------------------------------------------------------- |
+| `400`  | `BAD_REQUEST`    | Invalid query/provider combination                        |
+| `404`  | `CHANNEL_NOT_FOUND` / `NOT_FOUND` | Channel not found on the requested platform |
+| `404`  | `EMOTE_NOT_FOUND`| Proxy: emote URL not cached for this id (FFZ/Kick)        |
+| `429`  | `RATE_LIMITED`   | Rate limit exceeded, `Retry-After` header is set          |
+| `502`  | `NETWORK_ERROR`  | Upstream provider request failed                          |
+
+Error responses use a shared shape:
+
+```json
+{ "error": { "code": "string", "message": "string" } }
+```
+
+Rate limiting is 10 requests per 10 seconds per IP address.
