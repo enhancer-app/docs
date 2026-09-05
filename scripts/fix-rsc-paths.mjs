@@ -63,7 +63,7 @@ for await (const file of walkFiles(OUT_DIR)) {
     console.log(`already exists, skipping: ${path.relative(OUT_DIR, target)}`);
     continue;
   } catch {
-    // target does not exist yet — safe to rename
+    // target does not exist yet - safe to rename
   }
 
   await fs.mkdir(path.dirname(target), { recursive: true });
