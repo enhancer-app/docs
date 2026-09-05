@@ -1,5 +1,5 @@
 {
   "title": "Public API",
   "defaultOpen": true,
-  "pages": ["aggregate", "user", "badge-images"]
+  "pages": ["aggregate", "user", "badge-images", "emotes"]
 }
