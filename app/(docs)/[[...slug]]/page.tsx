@@ -7,8 +7,10 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
-import { notFound } from 'next/navigation';
+import { OpenAPIPage } from '@/components/api-page';
 import { getMDXComponents } from '@/components/mdx';
+import { openapi } from '@/lib/openapi';
+import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { gitConfig } from '@/lib/shared';
@@ -35,6 +37,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       <DocsBody>
         <MDX
           components={getMDXComponents({
+            OpenAPIPage: async (props) => (
+              <OpenAPIPage {...(await openapi.preloadOpenAPIPage(page))} {...props} />
+            ),
             // this allows you to link to other pages with relative file paths
             a: createRelativeLink(source, page),
           })}

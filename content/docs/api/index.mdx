@@ -1,0 +1,26 @@
+---
+title: Enhancer API
+description: Public read-only API for Enhancer channel and user data.
+---
+
+The **Enhancer API** provides public read-only access to channel aggregates and
+user profiles. Each endpoint page includes parameters, response schemas,
+examples and an interactive request panel.
+
+## Base URL
+
+```text
+https://api.enhancer.at
+```
+
+## Endpoints
+
+- [Get channel aggregate](/api/channels/getChannelAggregate) — complete channel state, badges and appearance.
+- [Get user profile](/api/users/getUserProfile) — global profile data and paginated channel entries.
+- [Badge images](/api/badge-images) — CDN image URL format and size reference.
+
+Responses use the shared error shape:
+
+```json
+{ "error": { "code": "string", "message": "string" } }
+```
