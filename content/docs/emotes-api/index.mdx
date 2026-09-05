@@ -1,173 +1,25 @@
 ---
-title: Emotes
-description: GET /v1/global/emotes, GET /v1/channel/:channel/emotes and related endpoints
+title: Emotes API
+description: Public read-only API for Twitch, 7TV, BetterTTV, FrankerFaceZ and Kick emotes.
 ---
 
-Returns Twitch, 7TV, BetterTTV, FrankerFaceZ and native Kick emotes for a
-channel or for the global (shared) emote pool. Every emote carries
-provider-native URLs, so no extra requests are needed to render it.
+The **Emotes API** provides public endpoints for global and channel emote
+collections, platform channel identifiers and provider CDN redirects. Each
+endpoint page includes parameters, response schemas, examples and an
+interactive request panel.
+
+## Base URL
+
+```text
+https://emotes-api.enhancer.at
+```
 
 ## Endpoints
 
-```http
-GET https://emotes-api.enhancer.at/v1/global/emotes
-GET https://emotes-api.enhancer.at/v1/channel/:channel/emotes
-GET https://emotes-api.enhancer.at/v1/channel/:channel/id
-GET https://emotes-api.enhancer.at/proxy/:provider/:id/:size
-```
+- [Get global emotes](/emotes-api/emotes/getGlobalEmotes) — global emotes grouped by platform and provider.
+- [Get channel emotes](/emotes-api/emotes/getChannelEmotes) — channel-specific emotes with platform/provider filters.
+- [Get channel identifiers](/emotes-api/channels/getChannelIdentifiers) — platform-native channel ids.
+- [Get emote proxy redirect](/emotes-api/proxy/getEmoteProxy) — provider CDN redirect with caching headers.
 
-| Parameter | In   | Description                                                                 |
-| --------- | ---- | --------------------------------------------------------------------------- |
-| `channel` | path | Channel login (e.g. `xqc`), resolved on both platforms                   |
-| `provider`| path | Proxy only: `twitch`, `7tv`, `bttv`, `ffz` or `kick`                        |
-| `id`      | path | Proxy only: provider-native emote id                                         |
-| `size`    | path | Proxy only: image size, one of `1x`, `2x`, `3x`, `4x`                        |
-
-| Query parameter | Type     | Default | Description                                                        |
-| --------------- | -------- | ------- | ------------------------------------------------------------------ |
-| `platform`      | `string` | `all`   | `twitch`, `kick` or `all`                                          |
-| `provider`      | `string` | `all`   | `twitch`, `7tv`, `bttv`, `ffz`, `kick` or `all`                    |
-
-Provider combinations are validated per platform: Twitch supports `twitch`,
-`7tv`, `bttv` and `ffz`; Kick supports `kick` and `7tv`.
-
-## Example
-
-```bash
-curl 'https://emotes-api.enhancer.at/v1/channel/xqc/emotes'
-curl 'https://emotes-api.enhancer.at/v1/channel/xqc/emotes?platform=twitch&provider=7tv'
-curl 'https://emotes-api.enhancer.at/v1/global/emotes?platform=kick&provider=all'
-curl 'https://emotes-api.enhancer.at/v1/channel/xqc/id?platform=all'
-```
-
-**Response `200` (`/v1/channel/:channel/emotes`):**
-
-The response is a platform/provider matrix containing only the requested
-platforms and providers.
-
-```json
-{
-  "twitch": {
-    "twitch": [
-      {
-        "id": "emotesv2_abc123",
-        "provider": "twitch",
-        "code": "Kappa",
-        "urls": [
-          { "size": "1x", "url": "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_abc123/default/dark/1.0" },
-          { "size": "2x", "url": "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_abc123/default/dark/2.0" },
-          { "size": "3x", "url": "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_abc123/default/dark/3.0" }
-        ]
-      }
-    ],
-    "7tv": [
-      {
-        "id": "01EZPH3FHR000C438200A44F11",
-        "provider": "7tv",
-        "code": "TriKool",
-        "urls": [
-          { "size": "1x", "url": "https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/1x.webp" },
-          { "size": "2x", "url": "https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/2x.webp" },
-          { "size": "3x", "url": "https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/3x.webp" },
-          { "size": "4x", "url": "https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/4x.webp" }
-        ]
-      }
-    ],
-    "bttv": [],
-    "ffz": []
-  },
-  "kick": {
-    "kick": [
-      {
-        "id": "3753119",
-        "provider": "kick",
-        "code": "asmonSmash",
-        "urls": [
-          { "size": "1x", "url": "https://files.kick.com/emotes/3753119/fullsize" }
-        ]
-      }
-    ],
-    "7tv": []
-  }
-}
-```
-
-**Response `200` (`/v1/channel/:channel/id`):**
-
-```json
-{
-  "twitch": {
-    "platform": "twitch",
-    "id": "71092938",
-    "login": "xqc",
-    "displayName": "xQc",
-    "avatar": "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.jpeg"
-  },
-  "kick": {
-    "platform": "kick",
-    "id": "676",
-    "login": "xqc",
-    "displayName": "xQc",
-    "avatar": "https://files.kick.com/images/user/676/profile_image/conversion/931b4e8f-5445-427c-bd82-b473530390cc-fullsize.webp"
-  }
-}
-```
-
-## Response fields
-
-**`emotes[]` item (all collection endpoints):**
-
-| Field     | Type       | Description                                                        |
-| --------- | ---------- | ------------------------------------------------------------------ |
-| `id`      | `string`   | Provider-native emote id, always a string to avoid precision loss   |
-| `provider`| `string`   | `twitch`, `7tv`, `bttv`, `ffz` or `kick`                           |
-| `code`    | `string`   | Emote code as used in chat                                          |
-| `urls`    | `object[]` | Available image sizes, each `{ size, url }`                         |
-
-**`/v1/channel/:channel/id` item:**
-
-| Field         | Type     | Description                          |
-| ------------- | -------- | ------------------------------------ |
-| `platform`    | `string` | `twitch` or `kick`                   |
-| `id`          | `string` | Platform-native channel id           |
-| `login`       | `string` | Channel login                        |
-| `displayName` | `string` | Channel display name                 |
-| `avatar`      | `string` | Profile image URL                    |
-
-## Emote proxy
-
-The proxy does not need a channel or emote code — a provider, native emote id
-and size are enough. It responds with a `307` redirect to the provider CDN and
-a `Cache-Control` header. Twitch, 7TV and BetterTTV URLs are generated
-directly; FFZ and Kick URLs are resolved from the cached provider response, so
-an unknown mapping returns `404`.
-
-```bash
-curl -I 'https://emotes-api.enhancer.at/proxy/7tv/01EZPH3FHR000C438200A44F11/2x'
-curl -I 'https://emotes-api.enhancer.at/proxy/twitch/emotesv2_abc123/3x'
-curl -I 'https://emotes-api.enhancer.at/proxy/kick/3753119/1x'
-```
-
-```http
-HTTP/2 307
-Location: https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/2x.webp
-Cache-Control: public, max-age=86400, no-transform
-```
-
-## Errors
-
-| Status | Code             | Meaning                                                   |
-| ------ | ---------------- | --------------------------------------------------------- |
-| `400`  | `BAD_REQUEST`    | Invalid query/provider combination                        |
-| `404`  | `CHANNEL_NOT_FOUND` / `NOT_FOUND` | Channel not found on the requested platform |
-| `404`  | `EMOTE_NOT_FOUND`| Proxy: emote URL not cached for this id (FFZ/Kick)        |
-| `429`  | `RATE_LIMITED`   | Rate limit exceeded, `Retry-After` header is set          |
-| `502`  | `NETWORK_ERROR`  | Upstream provider request failed                          |
-
-Error responses use a shared shape:
-
-```json
-{ "error": { "code": "string", "message": "string" } }
-```
-
-Rate limiting is 10 requests per 10 seconds per IP address.
+Collection responses use a platform/provider matrix. A provider failure
+contributes an empty collection without failing the aggregate response.

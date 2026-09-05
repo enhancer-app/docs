@@ -1,0 +1,452 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Emotes API",
+    "version": "1.0.0",
+    "description": "Read-only API for Twitch, 7TV, BetterTTV, FrankerFaceZ and native Kick emotes."
+  },
+  "servers": [
+    {
+      "url": "https://emotes-api.enhancer.at"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Emotes",
+      "description": "Global and channel emote collections."
+    },
+    {
+      "name": "Channels",
+      "description": "Resolve platform-specific channel identifiers."
+    },
+    {
+      "name": "Proxy",
+      "description": "Resolve provider-native emote image URLs."
+    }
+  ],
+  "paths": {
+    "/v1/global/emotes": {
+      "get": {
+        "tags": ["Emotes"],
+        "operationId": "getGlobalEmotes",
+        "summary": "Get global emotes",
+        "description": "Returns the global emote collection grouped by platform and provider.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Platform"
+          },
+          {
+            "$ref": "#/components/parameters/Provider"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Global emotes grouped by platform and provider.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmoteMatrix"
+                },
+                "example": {
+                  "twitch": {
+                    "7tv": [
+                      {
+                        "id": "01G3WEGZN0000ET2J0MQP5YJ0G",
+                        "provider": "7tv",
+                        "code": "GAMBA",
+                        "urls": [
+                          {
+                            "size": "1x",
+                            "url": "https://cdn.7tv.app/emote/01G3WEGZN0000ET2J0MQP5YJ0G/1x.webp"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "502": {
+            "$ref": "#/components/responses/UpstreamError"
+          }
+        }
+      }
+    },
+    "/v1/channel/{channel}/emotes": {
+      "get": {
+        "tags": ["Emotes"],
+        "operationId": "getChannelEmotes",
+        "summary": "Get channel emotes",
+        "description": "Returns channel emotes grouped by platform and provider. A provider failure contributes an empty collection without failing the aggregate response.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "description": "Channel login.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "xqc"
+          },
+          {
+            "$ref": "#/components/parameters/Platform"
+          },
+          {
+            "$ref": "#/components/parameters/Provider"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Channel emotes grouped by platform and provider.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmoteMatrix"
+                },
+                "example": {
+                  "twitch": {
+                    "7tv": [
+                      {
+                        "id": "01G3WEGZN0000ET2J0MQP5YJ0G",
+                        "provider": "7tv",
+                        "code": "GAMBA",
+                        "urls": [
+                          {
+                            "size": "1x",
+                            "url": "https://cdn.7tv.app/emote/01G3WEGZN0000ET2J0MQP5YJ0G/1x.webp"
+                          },
+                          {
+                            "size": "2x",
+                            "url": "https://cdn.7tv.app/emote/01G3WEGZN0000ET2J0MQP5YJ0G/2x.webp"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "kick": {
+                    "kick": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/ChannelNotFound"
+          },
+          "502": {
+            "$ref": "#/components/responses/UpstreamError"
+          }
+        }
+      }
+    },
+    "/v1/channel/{channel}/id": {
+      "get": {
+        "tags": ["Channels"],
+        "operationId": "getChannelIdentifiers",
+        "summary": "Get channel identifiers",
+        "description": "Resolves the channel on the selected platforms and returns platform-native identifiers.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "description": "Channel login.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "xqc"
+          },
+          {
+            "$ref": "#/components/parameters/Platform"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resolved channel identifiers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelIdentifiers"
+                },
+                "example": {
+                  "twitch": {
+                    "platform": "twitch",
+                    "id": "71092938",
+                    "login": "xqc",
+                    "displayName": "xQc",
+                    "avatar": "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.jpeg"
+                  },
+                  "kick": {
+                    "platform": "kick",
+                    "id": "676",
+                    "login": "xqc",
+                    "displayName": "xQc",
+                    "avatar": "https://files.kick.com/images/user/676/profile_image/conversion/931b4e8f-5445-427c-bd82-b473530390cc-fullsize.webp"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/ChannelNotFound"
+          },
+          "502": {
+            "$ref": "#/components/responses/UpstreamError"
+          }
+        }
+      }
+    },
+    "/proxy/{provider}/{id}/{size}": {
+      "get": {
+        "tags": ["Proxy"],
+        "operationId": "getEmoteProxy",
+        "summary": "Get emote proxy redirect",
+        "description": "Returns a temporary redirect to the provider CDN. The response includes a public cache-control header.",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["twitch", "7tv", "bttv", "ffz", "kick"]
+            },
+            "example": "7tv"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Provider-native emote id.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "01G3WEGZN0000ET2J0MQP5YJ0G"
+          },
+          {
+            "name": "size",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["1x", "2x", "3x", "4x"]
+            },
+            "example": "2x"
+          }
+        ],
+        "responses": {
+          "307": {
+            "description": "Redirect to the provider CDN.",
+            "headers": {
+              "Location": {
+                "description": "Provider CDN image URL.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "Cache-Control": {
+                "description": "Public cache policy.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/EmoteNotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Platform": {
+        "name": "platform",
+        "in": "query",
+        "required": false,
+        "description": "Platforms to include. Defaults to `all`.",
+        "schema": {
+          "type": "string",
+          "enum": ["twitch", "kick", "all"],
+          "default": "all"
+        },
+        "example": "all"
+      },
+      "Provider": {
+        "name": "provider",
+        "in": "query",
+        "required": false,
+        "description": "Providers to include. Defaults to `all`.",
+        "schema": {
+          "type": "string",
+          "enum": ["twitch", "7tv", "bttv", "ffz", "kick", "all"],
+          "default": "all"
+        },
+        "example": "all"
+      }
+    },
+    "schemas": {
+      "EmoteUrl": {
+        "type": "object",
+        "required": ["size", "url"],
+        "properties": {
+          "size": {
+            "type": "string",
+            "enum": ["1x", "2x", "3x", "4x"]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "Emote": {
+        "type": "object",
+        "required": ["id", "provider", "code", "urls"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Provider-native id, always represented as a string."
+          },
+          "provider": {
+            "type": "string",
+            "enum": ["twitch", "7tv", "bttv", "ffz", "kick"]
+          },
+          "code": {
+            "type": "string"
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmoteUrl"
+            }
+          }
+        }
+      },
+      "EmoteProviderMap": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Emote"
+          }
+        }
+      },
+      "EmoteMatrix": {
+        "type": "object",
+        "description": "Platform keys map to provider keys, which map to emote arrays.",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/EmoteProviderMap"
+        }
+      },
+      "ChannelIdentifier": {
+        "type": "object",
+        "required": ["platform", "id", "login", "displayName", "avatar"],
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": ["twitch", "kick"]
+          },
+          "id": {
+            "type": "string"
+          },
+          "login": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "ChannelIdentifiers": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ChannelIdentifier"
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid query or path parameters.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ChannelNotFound": {
+        "description": "Channel was not found on the requested platform.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "EmoteNotFound": {
+        "description": "No URL is available for the requested emote.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "UpstreamError": {
+        "description": "An upstream provider request failed.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}

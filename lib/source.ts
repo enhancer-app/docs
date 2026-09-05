@@ -3,6 +3,9 @@ import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 
+import { openapi } from './openapi';
+import { openapiPlugin } from 'fumadocs-openapi/server';
+
 const docs = defineDocs({
   dir: 'content/docs',
   docs: {
@@ -20,7 +23,7 @@ const docs = defineDocs({
 export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),
-  plugins: [],
+  plugins: [openapi.loaderPlugin()],
 });
 
 export function getPageImageUrl(page: (typeof source)['$inferPage']) {

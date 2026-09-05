@@ -1,5 +1,5 @@
 {
   "title": "Emotes API",
   "defaultOpen": true,
-  "pages": ["index"]
+  "pages": ["index", "emotes", "channels", "proxy"]
 }

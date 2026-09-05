@@ -1,0 +1,462 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Enhancer API",
+    "version": "1.0.0",
+    "description": "Public read-only API for Enhancer channel and user data."
+  },
+  "servers": [
+    {
+      "url": "https://api.enhancer.at"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Channels",
+      "description": "Channel aggregates and platform identifiers."
+    },
+    {
+      "name": "Users",
+      "description": "Public user profiles and channel-specific appearance."
+    }
+  ],
+  "paths": {
+    "/v1/channel/{platform}/{externalId}/aggregate": {
+      "get": {
+        "tags": ["Channels"],
+        "operationId": "getChannelAggregate",
+        "summary": "Get channel aggregate",
+        "description": "Returns the complete channel state: assigned accounts, badge definitions and the cursor used for sync replay. Use `global` as the external id for the global aggregate.",
+        "parameters": [
+          {
+            "name": "platform",
+            "in": "path",
+            "required": true,
+            "description": "Platform name.",
+            "schema": {
+              "type": "string",
+              "enum": ["twitch", "kick"]
+            },
+            "example": "twitch"
+          },
+          {
+            "name": "externalId",
+            "in": "path",
+            "required": true,
+            "description": "Channel external id or login.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "h2p_gucio"
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "description": "Return `304 Not Modified` when the current ETag matches.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "\"33a64df551\""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Channel aggregate.",
+            "headers": {
+              "ETag": {
+                "description": "Entity tag for conditional requests.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelAggregate"
+                },
+                "example": {
+                  "channelId": "3f2b8c14-6a7d-4e89-9b0c-1d2e3f4a5b6c",
+                  "platform": "TWITCH",
+                  "accounts": [
+                    {
+                      "accountId": "a1b85243-288d-4022-912e-7e76a49be380",
+                      "externalId": "87037696",
+                      "badgesIds": ["7c9e6679-7425-40de-944b-e07fc1f90ae7"],
+                      "customNickname": "enhancer-user",
+                      "customFont": null,
+                      "hasGlow": true
+                    }
+                  ],
+                  "badges": [
+                    {
+                      "badgeId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                      "sources": {
+                        "18x18": "https://cdn.enhancer.at/badge/hash/18.webp",
+                        "36x36": "https://cdn.enhancer.at/badge/hash/36.webp",
+                        "72x72": "https://cdn.enhancer.at/badge/hash/72.webp"
+                      },
+                      "name": "Enhancer Developer",
+                      "priority": 999
+                    }
+                  ],
+                  "cursor": "1787259545448-0"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The aggregate has not changed since the supplied ETag."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/user/{platform}/{externalId}": {
+      "get": {
+        "tags": ["Users"],
+        "operationId": "getUserProfile",
+        "summary": "Get user profile",
+        "description": "Returns a public user profile with a complete global bucket and paginated per-channel buckets.",
+        "parameters": [
+          {
+            "name": "platform",
+            "in": "path",
+            "required": true,
+            "description": "Platform name.",
+            "schema": {
+              "type": "string",
+              "enum": ["twitch", "kick"]
+            },
+            "example": "twitch"
+          },
+          {
+            "name": "externalId",
+            "in": "path",
+            "required": true,
+            "description": "User external id or login.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "xqc"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Zero-based channels page.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "description": "Number of channels per page.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public user profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                },
+                "example": {
+                  "platform": "TWITCH",
+                  "accountId": "a1b85243-288d-4022-912e-7e76a49be380",
+                  "externalId": "71092938",
+                  "login": "xqc",
+                  "displayName": "xQc",
+                  "global": {
+                    "badges": [],
+                    "appearance": {
+                      "customNickname": null,
+                      "customFont": null,
+                      "hasGlow": false
+                    }
+                  },
+                  "channels": [],
+                  "page": 0,
+                  "hasNextPage": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "BadgeSources": {
+        "type": "object",
+        "required": ["18x18", "36x36", "72x72"],
+        "properties": {
+          "18x18": {
+            "type": "string",
+            "format": "uri"
+          },
+          "36x36": {
+            "type": "string",
+            "format": "uri"
+          },
+          "72x72": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "Badge": {
+        "type": "object",
+        "required": ["badgeId", "sources", "name", "priority"],
+        "properties": {
+          "badgeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sources": {
+            "$ref": "#/components/schemas/BadgeSources"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          }
+        }
+      },
+      "Appearance": {
+        "type": "object",
+        "required": ["customNickname", "customFont", "hasGlow"],
+        "properties": {
+          "customNickname": {
+            "type": ["string", "null"]
+          },
+          "customFont": {
+            "type": ["string", "null"]
+          },
+          "hasGlow": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AggregateAccount": {
+        "type": "object",
+        "required": ["accountId", "externalId", "badgesIds", "customNickname", "customFont", "hasGlow"],
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "badgesIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "customNickname": {
+            "type": ["string", "null"]
+          },
+          "customFont": {
+            "type": ["string", "null"]
+          },
+          "hasGlow": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChannelAggregate": {
+        "type": "object",
+        "required": ["channelId", "platform", "accounts", "badges", "cursor"],
+        "properties": {
+          "channelId": {
+            "type": ["string", "null"],
+            "format": "uuid"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["TWITCH", "KICK"]
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AggregateAccount"
+            }
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Badge"
+            }
+          },
+          "cursor": {
+            "type": "string"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "required": ["platform", "accountId", "externalId", "login", "displayName", "global", "channels", "page", "hasNextPage"],
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": ["TWITCH", "KICK"]
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "login": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "global": {
+            "$ref": "#/components/schemas/UserBucket"
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserChannel"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UserBucket": {
+        "type": "object",
+        "required": ["badges", "appearance"],
+        "properties": {
+          "badges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Badge"
+            }
+          },
+          "appearance": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Appearance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "UserChannel": {
+        "type": "object",
+        "required": ["channelExternalId", "channelLogin", "badges", "appearance"],
+        "properties": {
+          "channelExternalId": {
+            "type": "string"
+          },
+          "channelLogin": {
+            "type": "string"
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Badge"
+            }
+          },
+          "appearance": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Appearance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid parameters.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The requested channel or user was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}
