@@ -18,7 +18,7 @@ GET https://emotes-api.enhancer.at/proxy/:provider/:id/:size
 
 | Parameter | In   | Description                                                                 |
 | --------- | ---- | --------------------------------------------------------------------------- |
-| `channel` | path | Channel login (e.g. `furazek`), resolved on both platforms                   |
+| `channel` | path | Channel login (e.g. `xqc`), resolved on both platforms                   |
 | `provider`| path | Proxy only: `twitch`, `7tv`, `bttv`, `ffz` or `kick`                        |
 | `id`      | path | Proxy only: provider-native emote id                                         |
 | `size`    | path | Proxy only: image size, one of `1x`, `2x`, `3x`, `4x`                        |
@@ -34,10 +34,10 @@ Provider combinations are validated per platform: Twitch supports `twitch`,
 ## Example
 
 ```bash
-curl 'https://emotes-api.enhancer.at/v1/channel/furazek/emotes'
-curl 'https://emotes-api.enhancer.at/v1/channel/furazek/emotes?platform=twitch&provider=7tv'
+curl 'https://emotes-api.enhancer.at/v1/channel/xqc/emotes'
+curl 'https://emotes-api.enhancer.at/v1/channel/xqc/emotes?platform=twitch&provider=7tv'
 curl 'https://emotes-api.enhancer.at/v1/global/emotes?platform=kick&provider=all'
-curl 'https://emotes-api.enhancer.at/v1/channel/furazek/id?platform=all'
+curl 'https://emotes-api.enhancer.at/v1/channel/xqc/id?platform=all'
 ```
 
 **Response `200` (`/v1/channel/:channel/emotes`):**
@@ -98,17 +98,17 @@ platforms and providers.
 {
   "twitch": {
     "platform": "twitch",
-    "id": "89709140",
-    "login": "furazek",
-    "displayName": "FURAZEK",
-    "avatar": "https://static-cdn.jtvnw.net/jtv_user_pictures/[...]/profile_image-300x300.png"
+    "id": "71092938",
+    "login": "xqc",
+    "displayName": "xQc",
+    "avatar": "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.jpeg"
   },
   "kick": {
     "platform": "kick",
-    "id": "7420559",
-    "login": "furazek",
-    "displayName": "furazek",
-    "avatar": "https://files.kick.com/images/user/7420559/profile_image/[...]-fullsize.webp"
+    "id": "676",
+    "login": "xqc",
+    "displayName": "xQc",
+    "avatar": "https://files.kick.com/images/user/676/profile_image/conversion/931b4e8f-5445-427c-bd82-b473530390cc-fullsize.webp"
   }
 }
 ```
@@ -153,20 +153,6 @@ HTTP/2 307
 Location: https://cdn.7tv.app/emote/01EZPH3FHR000C438200A44F11/2x.webp
 Cache-Control: public, max-age=86400, no-transform
 ```
-
-## Notes
-
-- Twitch global emotes come from Twitch's public web GraphQL endpoint; no
-  Twitch OAuth is involved.
-- 7TV resolves the active 7TV connection for the requested platform.
-- BetterTTV and FrankerFaceZ are available only for Twitch.
-- Native Kick emotes use provider `kick` and are never reported as 7TV emotes.
-- A failing provider never breaks the whole response — it contributes an empty
-  array (Kick can block requests from some environments).
-- A channel that does not resolve on any platform yields empty per-platform
-  objects with `200` instead of an error.
-- Responses are cached; `/v1/channel/:channel/id` is served with
-  `Cache-Control: public, max-age=604800`.
 
 ## Errors
 
