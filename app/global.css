@@ -11,3 +11,30 @@ html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+/* Endpoint pages (components/api-page.tsx): prose heading margins are too loose for a stacked layout. */
+.api-operation > h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.api-operation > :first-child {
+  margin-top: 0;
+}
+
+.api-operation td:nth-child(2) {
+  white-space: nowrap;
+}
+
+/* The parameter text already names the allowed values; the "Value in" box only adds height. */
+.api-operation div.flex-col.bg-fd-secondary.rounded-lg.shadow-md.not-prose {
+  display: none;
+}
+
+.api-operation div.flex-row.flex-wrap:has(> div.not-prose.shadow-md:only-child) {
+  display: none;
+}
+
+.api-operation p:has(+ div.flex-row.flex-wrap > div.not-prose.shadow-md:only-child) {
+  margin-bottom: 0;
+}

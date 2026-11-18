@@ -1,26 +1,73 @@
 ---
-title: Enhancer API
-description: Public read-only API for Enhancer channel and user data.
+title: Overview
+description: Public read-only API for Enhancer badges and how users look in chat.
 ---
 
-The **Enhancer API** provides public read-only access to channel aggregates and
-user profiles. Each endpoint page includes parameters, response schemas,
-examples and an interactive request panel.
-
-## Base URL
+The Enhancer API is free, public and read-only. It needs no key.
 
 ```text
 https://api.enhancer.at
 ```
 
-## Endpoints
+## What do you want to get?
 
-- [Get channel aggregate](/api/channels/getChannelAggregate) - complete channel state, badges and appearance.
-- [Get user profile](/api/users/getUserProfile) - global profile data and paginated channel entries.
-- [Badge images](/api/badge-images) - CDN image URL format and size reference.
+| I want… | Request |
+| --- | --- |
+| [All global badges](/api/badges/getChannelBadges) | `GET /v1/channel/twitch/global/badges` |
+| [All badges of a channel](/api/badges/getChannelBadges) | `GET /v1/channel/twitch/{channel}/badges` |
+| [One badge](/api/badges/getBadge) | `GET /v1/badge/{badgeId}` |
+| [Users who show a badge](/api/badges/getBadgeUsers) | `GET /v1/badge/{badgeId}/users` |
+| [How a user looks on a channel](/api/users/getUser) | `GET /v1/channel/twitch/{channel}/users/{user}` |
+| [How a user looks everywhere else](/api/users/getUser) | `GET /v1/channel/twitch/global/users/{user}` |
+| [All badges a user has](/api/users/getUser) | `GET /v1/channel/twitch/{channel}/users/{user}?badges=all` |
+| [Fonts a user can pick](/api/users/getFonts) | `GET /v1/fonts` |
 
-Responses use the shared error shape:
+- Replace `twitch` with `kick` for Kick.
+- `{channel}` and `{user}` take a login or an ID.
+- `global` stands for what applies on every channel.
+
+## How a user looks
+
+[User](/api/users/getUser) returns exactly what chat shows on that channel. A
+user can set a nickname, font and glow for one channel; anything they did not
+set there comes from their global settings, so you never need to merge anything
+yourself.
+
+By default `badges` holds only the badges chat shows. Add `?badges=all` to also
+get the badges the user has but does not show; each badge then tells you with
+`shown: true` or `shown: false`.
+
+## Badges
+
+Every badge has the same fields:
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Badge ID |
+| `name` | Badge name |
+| `description` | Short text, may be empty |
+| `images` | WebP image URLs: `1x` is 18 px, `2x` is 36 px, `4x` is 72 px |
+
+## Pagination
+
+[Channel badges](/api/badges/getChannelBadges) and
+[Badge users](/api/badges/getBadgeUsers) return 50 items at a time (set
+`?limit=` from 1 to 100) and a `nextCursor`. Pass it as `?cursor=` to get the
+next page. `nextCursor` is `null` on the last page.
+
+## Fonts
+
+`font` is the name of a font, for example `Bungee`. [Fonts](/api/users/getFonts)
+lists every font a user can pick.
+
+## Errors
+
+An error returns this body:
 
 ```json
-{ "error": { "code": "string", "message": "string" } }
+{ "error": { "code": "NOT_FOUND", "message": "User not found" } }
 ```
+
+- `404`: Enhancer does not know this channel, user or badge.
+- `400`: a parameter is not valid, for example `limit`, `cursor` or a badge ID
+  that is not a UUID.

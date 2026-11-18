@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Enhancer API",
-    "version": "1.0.0",
-    "description": "Public read-only API for Enhancer channel and user data."
+    "version": "2.0.0",
+    "description": "Public read-only API for Enhancer badges and user looks."
   },
   "servers": [
     {
@@ -12,27 +12,74 @@
   ],
   "tags": [
     {
-      "name": "Channels",
-      "description": "Channel aggregates and platform identifiers."
+      "name": "Badges",
+      "description": "Badges and who shows them."
     },
     {
       "name": "Users",
-      "description": "Public user profiles and channel-specific appearance."
+      "description": "How a user looks in chat."
     }
   ],
   "paths": {
-    "/v1/channel/{platform}/{externalId}/aggregate": {
+    "/v1/channel/{platform}/{channel}/badges": {
       "get": {
-        "tags": ["Channels"],
-        "operationId": "getChannelAggregate",
-        "summary": "Get channel aggregate",
-        "description": "Returns the complete channel state: assigned accounts, badge definitions and the cursor used for sync replay. Use `global` as the external id for the global aggregate.",
+        "tags": ["Badges"],
+        "operationId": "getChannelBadges",
+        "x-fields": [
+          {
+            "name": "badges",
+            "type": "array",
+            "description": "Badges of the channel. Empty when it has none."
+          },
+          {
+            "name": "badges[].id",
+            "type": "string",
+            "description": "Badge ID. Use it with Badge and Badge users."
+          },
+          {
+            "name": "badges[].name",
+            "type": "string",
+            "description": "Badge name."
+          },
+          {
+            "name": "badges[].description",
+            "type": "string",
+            "description": "Short text from the badge owner. Can be empty."
+          },
+          {
+            "name": "badges[].images.1x",
+            "type": "string",
+            "description": "Image URL, 18×18 px WebP. The size used in chat."
+          },
+          {
+            "name": "badges[].images.2x",
+            "type": "string",
+            "description": "Image URL, 36×36 px WebP."
+          },
+          {
+            "name": "badges[].images.4x",
+            "type": "string",
+            "description": "Image URL, 72×72 px WebP."
+          },
+          {
+            "name": "badges[].users",
+            "type": "integer",
+            "description": "How many users show this badge in chat."
+          },
+          {
+            "name": "nextCursor",
+            "type": "string | null",
+            "description": "Pass it as cursor to get the next page. null on the last page."
+          }
+        ],
+        "summary": "Channel badges",
+        "description": "Badges of a channel, 50 per page. Use global as the channel to get the global badges.",
         "parameters": [
           {
             "name": "platform",
             "in": "path",
             "required": true,
-            "description": "Platform name.",
+            "description": "`twitch` or `kick`.",
             "schema": {
               "type": "string",
               "enum": ["twitch", "kick"]
@@ -40,75 +87,74 @@
             "example": "twitch"
           },
           {
-            "name": "externalId",
+            "name": "channel",
             "in": "path",
             "required": true,
-            "description": "Channel external id or login.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "example": "h2p_gucio"
-          },
-          {
-            "name": "If-None-Match",
-            "in": "header",
-            "required": false,
-            "description": "Return `304 Not Modified` when the current ETag matches.",
+            "description": "Channel login or ID, or `global`.",
             "schema": {
               "type": "string"
             },
-            "example": "\"33a64df551\""
+            "example": "gambit_florydy"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Items per page, 1-100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "nextCursor from the previous page. Leave it out for the first page.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Channel aggregate.",
-            "headers": {
-              "ETag": {
-                "description": "Entity tag for conditional requests.",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
+            "description": "Badges of the channel.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChannelAggregate"
+                  "$ref": "#/components/schemas/ChannelBadges"
                 },
                 "example": {
-                  "channelId": "3f2b8c14-6a7d-4e89-9b0c-1d2e3f4a5b6c",
-                  "platform": "TWITCH",
-                  "accounts": [
-                    {
-                      "accountId": "a1b85243-288d-4022-912e-7e76a49be380",
-                      "externalId": "87037696",
-                      "badgesIds": ["7c9e6679-7425-40de-944b-e07fc1f90ae7"],
-                      "customNickname": "enhancer-user",
-                      "customFont": null,
-                      "hasGlow": true
-                    }
-                  ],
                   "badges": [
                     {
-                      "badgeId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-                      "sources": {
-                        "18x18": "https://cdn.enhancer.at/badge/hash/18.webp",
-                        "36x36": "https://cdn.enhancer.at/badge/hash/36.webp",
-                        "72x72": "https://cdn.enhancer.at/badge/hash/72.webp"
+                      "id": "9417260b-f97e-416d-b330-0aa05bd958a1",
+                      "name": "0o",
+                      "description": "",
+                      "images": {
+                        "1x": "https://cdn.enhancer.at/badge/c5c6…/18.webp",
+                        "2x": "https://cdn.enhancer.at/badge/c5c6…/36.webp",
+                        "4x": "https://cdn.enhancer.at/badge/c5c6…/72.webp"
                       },
-                      "name": "Enhancer Developer",
-                      "priority": 999
+                      "users": 3
+                    },
+                    {
+                      "id": "22a9bdf0-9dd6-4893-8776-6f9ab992610f",
+                      "name": "Ente",
+                      "description": "",
+                      "images": {
+                        "1x": "https://cdn.enhancer.at/badge/2584…/18.webp",
+                        "2x": "https://cdn.enhancer.at/badge/2584…/36.webp",
+                        "4x": "https://cdn.enhancer.at/badge/2584…/72.webp"
+                      },
+                      "users": 1
                     }
                   ],
-                  "cursor": "1787259545448-0"
+                  "nextCursor": null
                 }
               }
             }
-          },
-          "304": {
-            "description": "The aggregate has not changed since the supplied ETag."
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -119,86 +165,86 @@
         }
       }
     },
-    "/v1/user/{platform}/{externalId}": {
+    "/v1/badge/{badgeId}": {
       "get": {
-        "tags": ["Users"],
-        "operationId": "getUserProfile",
-        "summary": "Get user profile",
-        "description": "Returns a public user profile with a complete global bucket and paginated per-channel buckets.",
-        "parameters": [
+        "tags": ["Badges"],
+        "operationId": "getBadge",
+        "x-fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "Badge ID. Use it with Badge and Badge users."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Badge name."
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Short text from the badge owner. Can be empty."
+          },
+          {
+            "name": "images.1x",
+            "type": "string",
+            "description": "Image URL, 18×18 px WebP. The size used in chat."
+          },
+          {
+            "name": "images.2x",
+            "type": "string",
+            "description": "Image URL, 36×36 px WebP."
+          },
+          {
+            "name": "images.4x",
+            "type": "string",
+            "description": "Image URL, 72×72 px WebP."
+          },
           {
             "name": "platform",
+            "type": "string | null",
+            "description": "twitch or kick for a channel badge, null for a global badge."
+          },
+          {
+            "name": "channel",
+            "type": "string | null",
+            "description": "Login of the channel that owns the badge, null for a global badge."
+          }
+        ],
+        "summary": "Badge",
+        "description": "One badge and the channel it belongs to.",
+        "parameters": [
+          {
+            "name": "badgeId",
             "in": "path",
             "required": true,
-            "description": "Platform name.",
+            "description": "Badge ID.",
             "schema": {
               "type": "string",
-              "enum": ["twitch", "kick"]
+              "format": "uuid"
             },
-            "example": "twitch"
-          },
-          {
-            "name": "externalId",
-            "in": "path",
-            "required": true,
-            "description": "User external id or login.",
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "example": "xqc"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "description": "Zero-based channels page.",
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            },
-            "example": 0
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "required": false,
-            "description": "Number of channels per page.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 50
-            },
-            "example": 50
+            "example": "9417260b-f97e-416d-b330-0aa05bd958a1"
           }
         ],
         "responses": {
           "200": {
-            "description": "Public user profile.",
+            "description": "The badge.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfile"
+                  "$ref": "#/components/schemas/BadgeDetail"
                 },
                 "example": {
-                  "platform": "TWITCH",
-                  "accountId": "a1b85243-288d-4022-912e-7e76a49be380",
-                  "externalId": "71092938",
-                  "login": "xqc",
-                  "displayName": "xQc",
-                  "global": {
-                    "badges": [],
-                    "appearance": {
-                      "customNickname": null,
-                      "customFont": null,
-                      "hasGlow": false
-                    }
+                  "id": "9417260b-f97e-416d-b330-0aa05bd958a1",
+                  "name": "0o",
+                  "description": "",
+                  "images": {
+                    "1x": "https://cdn.enhancer.at/badge/c5c6…/18.webp",
+                    "2x": "https://cdn.enhancer.at/badge/c5c6…/36.webp",
+                    "4x": "https://cdn.enhancer.at/badge/c5c6…/72.webp"
                   },
-                  "channels": [],
-                  "page": 0,
-                  "hasNextPage": false
+                  "platform": "twitch",
+                  "channel": "gambit_florydy"
                 }
               }
             }
@@ -208,6 +254,314 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/badge/{badgeId}/users": {
+      "get": {
+        "tags": ["Badges"],
+        "operationId": "getBadgeUsers",
+        "x-fields": [
+          {
+            "name": "users",
+            "type": "array",
+            "description": "Users who show the badge in chat, up to limit per page."
+          },
+          {
+            "name": "users[].id",
+            "type": "string",
+            "description": "User ID on the platform."
+          },
+          {
+            "name": "users[].login",
+            "type": "string",
+            "description": "User login, lowercase."
+          },
+          {
+            "name": "users[].displayName",
+            "type": "string",
+            "description": "Name as the platform shows it."
+          },
+          {
+            "name": "users[].platform",
+            "type": "string",
+            "description": "twitch or kick."
+          },
+          {
+            "name": "nextCursor",
+            "type": "string | null",
+            "description": "Pass it as cursor to get the next page. null on the last page."
+          }
+        ],
+        "summary": "Badge users",
+        "description": "Users who show the badge in chat, 50 per page.",
+        "parameters": [
+          {
+            "name": "badgeId",
+            "in": "path",
+            "required": true,
+            "description": "Badge ID.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "9417260b-f97e-416d-b330-0aa05bd958a1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Items per page, 1-100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "nextCursor from the previous page. Leave it out for the first page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeUsers"
+                },
+                "example": {
+                  "users": [
+                    {
+                      "id": "123456789",
+                      "login": "example_viewer",
+                      "displayName": "Example_Viewer",
+                      "platform": "twitch"
+                    }
+                  ],
+                  "nextCursor": "eyJhZnRlciI6IjEyMzQ1Njc4OSJ9"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/channel/{platform}/{channel}/users/{user}": {
+      "get": {
+        "tags": ["Users"],
+        "operationId": "getUser",
+        "x-fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "User ID on the platform."
+          },
+          {
+            "name": "login",
+            "type": "string",
+            "description": "User login, lowercase."
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "Name as the platform shows it."
+          },
+          {
+            "name": "nickname",
+            "type": "string | null",
+            "description": "Custom nickname shown instead of displayName. null when not set."
+          },
+          {
+            "name": "font",
+            "type": "string | null",
+            "description": "Font for the name, one of Fonts. null for the default font."
+          },
+          {
+            "name": "glow",
+            "type": "boolean",
+            "description": "true when the name glows."
+          },
+          {
+            "name": "badges",
+            "type": "array",
+            "description": "Badges shown in front of the name, in display order. With badges=all, the badges the user does not show follow them. Empty when none."
+          },
+          {
+            "name": "badges[].id",
+            "type": "string",
+            "description": "Badge ID. Use it with Badge and Badge users."
+          },
+          {
+            "name": "badges[].name",
+            "type": "string",
+            "description": "Badge name."
+          },
+          {
+            "name": "badges[].description",
+            "type": "string",
+            "description": "Short text from the badge owner. Can be empty."
+          },
+          {
+            "name": "badges[].images.1x",
+            "type": "string",
+            "description": "Image URL, 18×18 px WebP. The size used in chat."
+          },
+          {
+            "name": "badges[].images.2x",
+            "type": "string",
+            "description": "Image URL, 36×36 px WebP."
+          },
+          {
+            "name": "badges[].images.4x",
+            "type": "string",
+            "description": "Image URL, 72×72 px WebP."
+          },
+          {
+            "name": "badges[].shown",
+            "type": "boolean",
+            "description": "true when chat shows the badge. Always true without badges=all."
+          }
+        ],
+        "summary": "User",
+        "description": "How a user looks in chat on a channel: nickname, font, glow and badges. Use global as the channel for the global look.",
+        "parameters": [
+          {
+            "name": "platform",
+            "in": "path",
+            "required": true,
+            "description": "`twitch` or `kick`.",
+            "schema": {
+              "type": "string",
+              "enum": ["twitch", "kick"]
+            },
+            "example": "twitch"
+          },
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "description": "Channel login or ID, or `global`.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "gambit_florydy"
+          },
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "description": "User login or ID.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "igorovh"
+          },
+          {
+            "name": "badges",
+            "in": "query",
+            "required": false,
+            "description": "`shown` (default) returns the badges chat shows. `all` also returns badges the user has but does not show.",
+            "schema": {
+              "type": "string",
+              "enum": ["shown", "all"],
+              "default": "shown"
+            },
+            "example": "all"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "87037696",
+                  "login": "igorovh",
+                  "displayName": "igorovh",
+                  "nickname": "igor",
+                  "font": null,
+                  "glow": true,
+                  "badges": [
+                    {
+                      "id": "bb90ca1c-52ed-4fc4-a9ab-4274c8b9c394",
+                      "name": "Enhancer Developer",
+                      "description": "Enhancer Developer",
+                      "images": {
+                        "1x": "https://cdn.enhancer.at/badge/a041…/18.webp",
+                        "2x": "https://cdn.enhancer.at/badge/a041…/36.webp",
+                        "4x": "https://cdn.enhancer.at/badge/a041…/72.webp"
+                      },
+                      "shown": true
+                    },
+                    {
+                      "id": "c3422859-640c-449a-b23a-1a637f42cdaa",
+                      "name": "Enhancer Tester",
+                      "description": "Enhancer Tester",
+                      "images": {
+                        "1x": "https://cdn.enhancer.at/badge/90db…/18.webp",
+                        "2x": "https://cdn.enhancer.at/badge/90db…/36.webp",
+                        "4x": "https://cdn.enhancer.at/badge/90db…/72.webp"
+                      },
+                      "shown": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/fonts": {
+      "get": {
+        "tags": ["Users"],
+        "operationId": "getFonts",
+        "x-fields": [
+          {
+            "name": "fonts",
+            "type": "string[]",
+            "description": "Names of the fonts a user can pick. font in User is always one of them."
+          }
+        ],
+        "summary": "Fonts",
+        "description": "Fonts a user can pick for their nickname.",
+        "responses": {
+          "200": {
+            "description": "Allowed fonts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Fonts"
+                },
+                "example": {
+                  "fonts": ["Bungee", "Special Elite"]
+                }
+              }
+            }
           }
         }
       }
@@ -233,19 +587,20 @@
           }
         }
       },
-      "BadgeSources": {
+      "BadgeImages": {
         "type": "object",
-        "required": ["18x18", "36x36", "72x72"],
+        "description": "WebP image URLs: `1x` is 18 px, `2x` 36 px, `4x` 72 px.",
+        "required": ["1x", "2x", "4x"],
         "properties": {
-          "18x18": {
+          "1x": {
             "type": "string",
             "format": "uri"
           },
-          "36x36": {
+          "2x": {
             "type": "string",
             "format": "uri"
           },
-          "72x72": {
+          "4x": {
             "type": "string",
             "format": "uri"
           }
@@ -253,14 +608,11 @@
       },
       "Badge": {
         "type": "object",
-        "required": ["badgeId", "sources", "name", "priority"],
+        "required": ["id", "name", "description", "images"],
         "properties": {
-          "badgeId": {
+          "id": {
             "type": "string",
             "format": "uuid"
-          },
-          "sources": {
-            "$ref": "#/components/schemas/BadgeSources"
           },
           "name": {
             "type": "string"
@@ -268,97 +620,131 @@
           "description": {
             "type": "string"
           },
-          "priority": {
-            "type": "integer"
+          "images": {
+            "$ref": "#/components/schemas/BadgeImages"
           }
         }
       },
-      "Appearance": {
+      "ChannelBadges": {
         "type": "object",
-        "required": ["customNickname", "customFont", "hasGlow"],
+        "required": ["badges", "nextCursor"],
         "properties": {
-          "customNickname": {
-            "type": ["string", "null"]
-          },
-          "customFont": {
-            "type": ["string", "null"]
-          },
-          "hasGlow": {
-            "type": "boolean"
-          }
-        }
-      },
-      "AggregateAccount": {
-        "type": "object",
-        "required": ["accountId", "externalId", "badgesIds", "customNickname", "customFont", "hasGlow"],
-        "properties": {
-          "accountId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "externalId": {
-            "type": "string"
-          },
-          "badgesIds": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "customNickname": {
-            "type": ["string", "null"]
-          },
-          "customFont": {
-            "type": ["string", "null"]
-          },
-          "hasGlow": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ChannelAggregate": {
-        "type": "object",
-        "required": ["channelId", "platform", "accounts", "badges", "cursor"],
-        "properties": {
-          "channelId": {
-            "type": ["string", "null"],
-            "format": "uuid"
-          },
-          "platform": {
-            "type": "string",
-            "enum": ["TWITCH", "KICK"]
-          },
-          "accounts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AggregateAccount"
-            }
-          },
           "badges": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Badge"
+              "type": "object",
+              "required": ["id", "name", "description", "images", "users"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "images": {
+                  "$ref": "#/components/schemas/BadgeImages"
+                },
+                "users": {
+                  "type": "integer",
+                  "description": "How many users show this badge."
+                }
+              }
             }
           },
-          "cursor": {
-            "type": "string"
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "`null` on the last page."
           }
         }
       },
-      "UserProfile": {
+      "BadgeDetail": {
         "type": "object",
-        "required": ["platform", "accountId", "externalId", "login", "displayName", "global", "channels", "page", "hasNextPage"],
+        "required": [
+          "id",
+          "name",
+          "description",
+          "images",
+          "platform",
+          "channel"
+        ],
         "properties": {
-          "platform": {
-            "type": "string",
-            "enum": ["TWITCH", "KICK"]
-          },
-          "accountId": {
+          "id": {
             "type": "string",
             "format": "uuid"
           },
-          "externalId": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "images": {
+            "$ref": "#/components/schemas/BadgeImages"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["twitch", "kick"],
+            "nullable": true,
+            "description": "`null` for a global badge."
+          },
+          "channel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Channel login; `null` for a global badge."
+          }
+        }
+      },
+      "BadgeUsers": {
+        "type": "object",
+        "required": ["users", "nextCursor"],
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "login", "displayName", "platform"],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "platform": {
+                  "type": "string",
+                  "enum": ["twitch", "kick"]
+                }
+              }
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "`null` on the last page."
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "login",
+          "displayName",
+          "nickname",
+          "font",
+          "glow",
+          "badges"
+        ],
+        "properties": {
+          "id": {
             "type": "string"
           },
           "login": {
@@ -367,78 +753,57 @@
           "displayName": {
             "type": "string"
           },
-          "global": {
-            "$ref": "#/components/schemas/UserBucket"
+          "nickname": {
+            "type": "string",
+            "nullable": true,
+            "description": "Custom nickname, or `null`."
           },
-          "channels": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserChannel"
-            }
+          "font": {
+            "type": "string",
+            "nullable": true,
+            "description": "Font name from Fonts, or `null`."
           },
-          "page": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "hasNextPage": {
+          "glow": {
             "type": "boolean"
-          }
-        }
-      },
-      "UserBucket": {
-        "type": "object",
-        "required": ["badges", "appearance"],
-        "properties": {
-          "badges": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Badge"
-            }
-          },
-          "appearance": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Appearance"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        }
-      },
-      "UserChannel": {
-        "type": "object",
-        "required": ["channelExternalId", "channelLogin", "badges", "appearance"],
-        "properties": {
-          "channelExternalId": {
-            "type": "string"
-          },
-          "channelLogin": {
-            "type": "string"
           },
           "badges": {
             "type": "array",
+            "description": "Badges the user shows in this chat; with `badges=all` also the ones they do not show.",
             "items": {
-              "$ref": "#/components/schemas/Badge"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Badge"
+                },
+                {
+                  "type": "object",
+                  "required": ["shown"],
+                  "properties": {
+                    "shown": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              ]
             }
-          },
-          "appearance": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Appearance"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          }
+        }
+      },
+      "Fonts": {
+        "type": "object",
+        "required": ["fonts"],
+        "properties": {
+          "fonts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
     },
     "responses": {
       "BadRequest": {
-        "description": "Invalid parameters.",
+        "description": "A parameter is not valid.",
         "content": {
           "application/json": {
             "schema": {
@@ -448,7 +813,7 @@
         }
       },
       "NotFound": {
-        "description": "The requested channel or user was not found.",
+        "description": "Unknown channel, user or badge.",
         "content": {
           "application/json": {
             "schema": {
