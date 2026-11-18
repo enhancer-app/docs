@@ -13,52 +13,22 @@ https://api.enhancer.at
 
 | I want… | Request |
 | --- | --- |
-| All global badges | `GET /v1/channel/twitch/global/badges` |
-| All badges of a channel | `GET /v1/channel/twitch/{channel}/badges` |
-| One badge | `GET /v1/badge/{badgeId}` |
-| Users who show a badge | `GET /v1/badge/{badgeId}/users` |
-| How a user looks on a channel | `GET /v1/channel/twitch/{channel}/users/{user}` |
-| How a user looks everywhere else | `GET /v1/channel/twitch/global/users/{user}` |
-| Fonts a user can pick | `GET /v1/fonts` |
+| [All global badges](/api/badges/getChannelBadges) | `GET /v1/channel/twitch/global/badges` |
+| [All badges of a channel](/api/badges/getChannelBadges) | `GET /v1/channel/twitch/{channel}/badges` |
+| [One badge](/api/badges/getBadge) | `GET /v1/badge/{badgeId}` |
+| [Users who show a badge](/api/badges/getBadgeUsers) | `GET /v1/badge/{badgeId}/users` |
+| [How a user looks on a channel](/api/users/getUser) | `GET /v1/channel/twitch/{channel}/users/{user}` |
+| [How a user looks everywhere else](/api/users/getUser) | `GET /v1/channel/twitch/global/users/{user}` |
+| [Fonts a user can pick](/api/users/getFonts) | `GET /v1/fonts` |
 
 - Replace `twitch` with `kick` for Kick.
 - `{channel}` and `{user}` take a login or an ID.
 - `global` stands for what applies on every channel.
 
-## A user on a channel
+## How a user looks
 
-```bash
-curl https://api.enhancer.at/v1/channel/twitch/gambit_florydy/users/igorovh
-```
-
-```json
-{
-  "id": "87037696",
-  "login": "igorovh",
-  "displayName": "igorovh",
-  "nickname": "igor",
-  "font": null,
-  "glow": true,
-  "badges": [
-    {
-      "id": "bb90ca1c-52ed-4fc4-a9ab-4274c8b9c394",
-      "name": "Enhancer Developer",
-      "description": "Enhancer Developer",
-      "images": {
-        "1x": "https://cdn.enhancer.at/badge/a041…/18.webp",
-        "2x": "https://cdn.enhancer.at/badge/a041…/36.webp",
-        "4x": "https://cdn.enhancer.at/badge/a041…/72.webp"
-      }
-    }
-  ]
-}
-```
-
-This is exactly what chat shows on that channel. Draw the name as `nickname`
-(or `displayName` when it is `null`), in `font`, with a glow when `glow` is
-`true`, and put the `badges` in front of it.
-
-A user can set a nickname, font and glow for one channel. Anything they did not
+[User](/api/users/getUser) returns exactly what chat shows on that channel. A
+user can set a nickname, font and glow for one channel; anything they did not
 set there comes from their global settings, so you never need to merge anything
 yourself.
 
@@ -73,13 +43,12 @@ Every badge has the same fields:
 | `description` | Short text, may be empty |
 | `images` | WebP image URLs: `1x` is 18 px, `2x` is 36 px, `4x` is 72 px |
 
-The channel badge list also has `users`: how many users show the badge.
+## Pagination
 
-## Long lists
-
-Only [Badge users](/api/badges/getBadgeUsers) returns a long list. It returns 50
-users at a time and a `nextCursor`. Pass it as `?cursor=` to get the next 50.
-`nextCursor` is `null` on the last page.
+[Channel badges](/api/badges/getChannelBadges) and
+[Badge users](/api/badges/getBadgeUsers) return 50 items at a time (set
+`?limit=` from 1 to 100) and a `nextCursor`. Pass it as `?cursor=` to get the
+next page. `nextCursor` is `null` on the last page.
 
 ## Fonts
 

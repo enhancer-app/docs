@@ -25,8 +25,55 @@
       "get": {
         "tags": ["Badges"],
         "operationId": "getChannelBadges",
+        "x-fields": [
+          {
+            "name": "badges",
+            "type": "array",
+            "description": "Badges of the channel. Empty when it has none."
+          },
+          {
+            "name": "badges[].id",
+            "type": "string",
+            "description": "Badge ID. Use it with Badge and Badge users."
+          },
+          {
+            "name": "badges[].name",
+            "type": "string",
+            "description": "Badge name."
+          },
+          {
+            "name": "badges[].description",
+            "type": "string",
+            "description": "Short text from the badge owner. Can be empty."
+          },
+          {
+            "name": "badges[].images.1x",
+            "type": "string",
+            "description": "Image URL, 18×18 px WebP. The size used in chat."
+          },
+          {
+            "name": "badges[].images.2x",
+            "type": "string",
+            "description": "Image URL, 36×36 px WebP."
+          },
+          {
+            "name": "badges[].images.4x",
+            "type": "string",
+            "description": "Image URL, 72×72 px WebP."
+          },
+          {
+            "name": "badges[].users",
+            "type": "number",
+            "description": "How many users show this badge in chat."
+          },
+          {
+            "name": "nextCursor",
+            "type": "string | null",
+            "description": "Pass it as cursor to get the next page. null on the last page."
+          }
+        ],
         "summary": "Channel badges",
-        "description": "All badges of a channel. Use global as the channel to get the global badges.",
+        "description": "Badges of a channel, 50 per page. Use global as the channel to get the global badges.",
         "parameters": [
           {
             "name": "platform",
@@ -48,6 +95,27 @@
               "type": "string"
             },
             "example": "gambit_florydy"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Items per page, 1-100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "nextCursor from the previous page. Leave it out for the first page.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -82,10 +150,14 @@
                       },
                       "users": 1
                     }
-                  ]
+                  ],
+                  "nextCursor": null
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -97,6 +169,48 @@
       "get": {
         "tags": ["Badges"],
         "operationId": "getBadge",
+        "x-fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "Badge ID. Use it with Badge and Badge users."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Badge name."
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Short text from the badge owner. Can be empty."
+          },
+          {
+            "name": "images.1x",
+            "type": "string",
+            "description": "Image URL, 18×18 px WebP. The size used in chat."
+          },
+          {
+            "name": "images.2x",
+            "type": "string",
+            "description": "Image URL, 36×36 px WebP."
+          },
+          {
+            "name": "images.4x",
+            "type": "string",
+            "description": "Image URL, 72×72 px WebP."
+          },
+          {
+            "name": "platform",
+            "type": "string | null",
+            "description": "twitch or kick for a channel badge, null for a global badge."
+          },
+          {
+            "name": "channel",
+            "type": "string | null",
+            "description": "Login of the channel that owns the badge, null for a global badge."
+          }
+        ],
         "summary": "Badge",
         "description": "One badge and the channel it belongs to.",
         "parameters": [
@@ -145,8 +259,40 @@
       "get": {
         "tags": ["Badges"],
         "operationId": "getBadgeUsers",
+        "x-fields": [
+          {
+            "name": "users",
+            "type": "array",
+            "description": "Users who show the badge in chat, up to limit per page."
+          },
+          {
+            "name": "users[].id",
+            "type": "string",
+            "description": "User ID on the platform."
+          },
+          {
+            "name": "users[].login",
+            "type": "string",
+            "description": "User login, lowercase."
+          },
+          {
+            "name": "users[].displayName",
+            "type": "string",
+            "description": "Name as the platform shows it."
+          },
+          {
+            "name": "users[].platform",
+            "type": "string",
+            "description": "twitch or kick."
+          },
+          {
+            "name": "nextCursor",
+            "type": "string | null",
+            "description": "Pass it as cursor to get the next page. null on the last page."
+          }
+        ],
         "summary": "Badge users",
-        "description": "Users who show the badge in chat, 50 per page. Pass nextCursor as cursor to get the next page.",
+        "description": "Users who show the badge in chat, 50 per page.",
         "parameters": [
           {
             "name": "badgeId",
@@ -163,7 +309,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Users per page, 1-100.",
+            "description": "Items per page, 1-100.",
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -175,7 +321,7 @@
             "name": "cursor",
             "in": "query",
             "required": false,
-            "description": "`nextCursor` from the previous page.",
+            "description": "nextCursor from the previous page. Leave it out for the first page.",
             "schema": {
               "type": "string"
             }
@@ -216,6 +362,73 @@
       "get": {
         "tags": ["Users"],
         "operationId": "getUser",
+        "x-fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "User ID on the platform."
+          },
+          {
+            "name": "login",
+            "type": "string",
+            "description": "User login, lowercase."
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "Name as the platform shows it."
+          },
+          {
+            "name": "nickname",
+            "type": "string | null",
+            "description": "Custom nickname shown instead of displayName. null when not set."
+          },
+          {
+            "name": "font",
+            "type": "string | null",
+            "description": "Font for the name, one of Fonts. null for the default font."
+          },
+          {
+            "name": "glow",
+            "type": "boolean",
+            "description": "true when the name glows."
+          },
+          {
+            "name": "badges",
+            "type": "array",
+            "description": "Badges shown in front of the name, in display order. Empty when none."
+          },
+          {
+            "name": "badges[].id",
+            "type": "string",
+            "description": "Badge ID. Use it with Badge and Badge users."
+          },
+          {
+            "name": "badges[].name",
+            "type": "string",
+            "description": "Badge name."
+          },
+          {
+            "name": "badges[].description",
+            "type": "string",
+            "description": "Short text from the badge owner. Can be empty."
+          },
+          {
+            "name": "badges[].images.1x",
+            "type": "string",
+            "description": "Image URL, 18×18 px WebP. The size used in chat."
+          },
+          {
+            "name": "badges[].images.2x",
+            "type": "string",
+            "description": "Image URL, 36×36 px WebP."
+          },
+          {
+            "name": "badges[].images.4x",
+            "type": "string",
+            "description": "Image URL, 72×72 px WebP."
+          }
+        ],
         "summary": "User",
         "description": "How a user looks in chat on a channel: nickname, font, glow and badges. Use global as the channel for the global look.",
         "parameters": [
@@ -292,6 +505,13 @@
       "get": {
         "tags": ["Users"],
         "operationId": "getFonts",
+        "x-fields": [
+          {
+            "name": "fonts",
+            "type": "string[]",
+            "description": "Font names. Load one from https://fonts.enhancer.at/css2?family={font}."
+          }
+        ],
         "summary": "Fonts",
         "description": "Fonts a user can pick for their nickname.",
         "responses": {
@@ -372,7 +592,7 @@
       },
       "ChannelBadges": {
         "type": "object",
-        "required": ["badges"],
+        "required": ["badges", "nextCursor"],
         "properties": {
           "badges": {
             "type": "array",
@@ -399,6 +619,11 @@
                 }
               }
             }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "`null` on the last page."
           }
         }
       },
