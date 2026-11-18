@@ -63,7 +63,7 @@
           },
           {
             "name": "badges[].users",
-            "type": "number",
+            "type": "integer",
             "description": "How many users show this badge in chat."
           },
           {
@@ -81,7 +81,8 @@
             "required": true,
             "description": "`twitch` or `kick`.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": ["twitch", "kick"]
             },
             "example": "twitch"
           },
@@ -445,7 +446,8 @@
             "required": true,
             "description": "`twitch` or `kick`.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": ["twitch", "kick"]
             },
             "example": "twitch"
           },
@@ -476,6 +478,7 @@
             "description": "`shown` (default) returns the badges chat shows. `all` also returns badges the user has but does not show.",
             "schema": {
               "type": "string",
+              "enum": ["shown", "all"],
               "default": "shown"
             },
             "example": "all"
