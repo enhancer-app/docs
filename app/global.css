@@ -21,3 +21,7 @@ html > body[data-scroll-locked] {
 .api-operation > :first-child {
   margin-top: 0;
 }
+
+.api-operation td:nth-child(2) {
+  white-space: nowrap;
+}

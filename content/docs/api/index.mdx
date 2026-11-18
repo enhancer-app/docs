@@ -19,6 +19,7 @@ https://api.enhancer.at
 | [Users who show a badge](/api/badges/getBadgeUsers) | `GET /v1/badge/{badgeId}/users` |
 | [How a user looks on a channel](/api/users/getUser) | `GET /v1/channel/twitch/{channel}/users/{user}` |
 | [How a user looks everywhere else](/api/users/getUser) | `GET /v1/channel/twitch/global/users/{user}` |
+| [All badges a user has](/api/users/getUser) | `GET /v1/channel/twitch/{channel}/users/{user}?badges=all` |
 | [Fonts a user can pick](/api/users/getFonts) | `GET /v1/fonts` |
 
 - Replace `twitch` with `kick` for Kick.
@@ -31,6 +32,10 @@ https://api.enhancer.at
 user can set a nickname, font and glow for one channel; anything they did not
 set there comes from their global settings, so you never need to merge anything
 yourself.
+
+By default `badges` holds only the badges chat shows. Add `?badges=all` to also
+get the badges the user has but does not show; each badge then tells you with
+`shown: true` or `shown: false`.
 
 ## Badges
 
@@ -52,11 +57,8 @@ next page. `nextCursor` is `null` on the last page.
 
 ## Fonts
 
-`font` is a font name from [Fonts](/api/users/getFonts). Load it with:
-
-```text
-https://fonts.enhancer.at/css2?family={font}
-```
+`font` is the name of a font, for example `Bungee`. [Fonts](/api/users/getFonts)
+lists every font a user can pick.
 
 ## Errors
 

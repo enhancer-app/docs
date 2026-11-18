@@ -395,7 +395,7 @@
           {
             "name": "badges",
             "type": "array",
-            "description": "Badges shown in front of the name, in display order. Empty when none."
+            "description": "Badges shown in front of the name, in display order. With badges=all, the badges the user does not show follow them. Empty when none."
           },
           {
             "name": "badges[].id",
@@ -426,6 +426,11 @@
             "name": "badges[].images.4x",
             "type": "string",
             "description": "Image URL, 72×72 px WebP."
+          },
+          {
+            "name": "badges[].shown",
+            "type": "boolean",
+            "description": "true when chat shows the badge. Always true without badges=all."
           }
         ],
         "summary": "User",
@@ -460,6 +465,17 @@
               "type": "string"
             },
             "example": "igorovh"
+          },
+          {
+            "name": "badges",
+            "in": "query",
+            "required": false,
+            "description": "`shown` (default) returns the badges chat shows. `all` also returns badges the user has but does not show.",
+            "schema": {
+              "type": "string",
+              "default": "shown"
+            },
+            "example": "all"
           }
         ],
         "responses": {
@@ -486,7 +502,19 @@
                         "1x": "https://cdn.enhancer.at/badge/a041…/18.webp",
                         "2x": "https://cdn.enhancer.at/badge/a041…/36.webp",
                         "4x": "https://cdn.enhancer.at/badge/a041…/72.webp"
-                      }
+                      },
+                      "shown": true
+                    },
+                    {
+                      "id": "c3422859-640c-449a-b23a-1a637f42cdaa",
+                      "name": "Enhancer Tester",
+                      "description": "Enhancer Tester",
+                      "images": {
+                        "1x": "https://cdn.enhancer.at/badge/90db…/18.webp",
+                        "2x": "https://cdn.enhancer.at/badge/90db…/36.webp",
+                        "4x": "https://cdn.enhancer.at/badge/90db…/72.webp"
+                      },
+                      "shown": false
                     }
                   ]
                 }
@@ -507,7 +535,7 @@
           {
             "name": "fonts",
             "type": "string[]",
-            "description": "Font names. Load one from https://fonts.enhancer.at/css2?family={font}."
+            "description": "Names of the fonts a user can pick. font in User is always one of them."
           }
         ],
         "summary": "Fonts",
@@ -731,9 +759,22 @@
           },
           "badges": {
             "type": "array",
-            "description": "Badges the user shows in this chat.",
+            "description": "Badges the user shows in this chat; with `badges=all` also the ones they do not show.",
             "items": {
-              "$ref": "#/components/schemas/Badge"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Badge"
+                },
+                {
+                  "type": "object",
+                  "required": ["shown"],
+                  "properties": {
+                    "shown": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              ]
             }
           }
         }
