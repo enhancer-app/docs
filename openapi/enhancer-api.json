@@ -79,10 +79,9 @@
             "name": "platform",
             "in": "path",
             "required": true,
-            "description": "Platform.",
+            "description": "`twitch` or `kick`.",
             "schema": {
-              "type": "string",
-              "enum": ["twitch", "kick"]
+              "type": "string"
             },
             "example": "twitch"
           },
@@ -436,10 +435,9 @@
             "name": "platform",
             "in": "path",
             "required": true,
-            "description": "Platform.",
+            "description": "`twitch` or `kick`.",
             "schema": {
-              "type": "string",
-              "enum": ["twitch", "kick"]
+              "type": "string"
             },
             "example": "twitch"
           },

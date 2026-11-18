@@ -60,7 +60,7 @@ export const OpenAPIPage = createOpenAPIPage({
     renderOperationLayout: (slots, { operation }) => {
       const fields = readFields(operation);
       return (
-        <div className="flex flex-col gap-4">
+        <div className="api-operation">
           {slots.header}
           {slots.apiPlayground}
           {slots.description}
