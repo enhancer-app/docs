@@ -1,5 +1,5 @@
 {
   "title": "Enhancer API",
   "defaultOpen": true,
-  "pages": ["index", "channels", "users", "badge-images"]
+  "pages": ["badges", "users"]
 }

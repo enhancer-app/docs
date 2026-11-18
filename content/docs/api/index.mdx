@@ -1,26 +1,101 @@
 ---
-title: Enhancer API
-description: Public read-only API for Enhancer channel and user data.
+title: Overview
+description: Public read-only API for Enhancer badges and how users look in chat.
 ---
 
-The **Enhancer API** provides public read-only access to channel aggregates and
-user profiles. Each endpoint page includes parameters, response schemas,
-examples and an interactive request panel.
-
-## Base URL
+The Enhancer API is free, public and read-only. It needs no key.
 
 ```text
 https://api.enhancer.at
 ```
 
-## Endpoints
+## What do you want to get?
 
-- [Get channel aggregate](/api/channels/getChannelAggregate) - complete channel state, badges and appearance.
-- [Get user profile](/api/users/getUserProfile) - global profile data and paginated channel entries.
-- [Badge images](/api/badge-images) - CDN image URL format and size reference.
+| I want… | Request |
+| --- | --- |
+| All global badges | `GET /v1/channel/twitch/global/badges` |
+| All badges of a channel | `GET /v1/channel/twitch/{channel}/badges` |
+| One badge | `GET /v1/badge/{badgeId}` |
+| Users who show a badge | `GET /v1/badge/{badgeId}/users` |
+| How a user looks on a channel | `GET /v1/channel/twitch/{channel}/users/{user}` |
+| How a user looks everywhere else | `GET /v1/channel/twitch/global/users/{user}` |
+| Fonts a user can pick | `GET /v1/fonts` |
 
-Responses use the shared error shape:
+- Replace `twitch` with `kick` for Kick.
+- `{channel}` and `{user}` take a login or an ID.
+- `global` stands for what applies on every channel.
+
+## A user on a channel
+
+```bash
+curl https://api.enhancer.at/v1/channel/twitch/gambit_florydy/users/igorovh
+```
 
 ```json
-{ "error": { "code": "string", "message": "string" } }
+{
+  "id": "87037696",
+  "login": "igorovh",
+  "displayName": "igorovh",
+  "nickname": "igor",
+  "font": null,
+  "glow": true,
+  "badges": [
+    {
+      "id": "bb90ca1c-52ed-4fc4-a9ab-4274c8b9c394",
+      "name": "Enhancer Developer",
+      "description": "Enhancer Developer",
+      "images": {
+        "1x": "https://cdn.enhancer.at/badge/a041…/18.webp",
+        "2x": "https://cdn.enhancer.at/badge/a041…/36.webp",
+        "4x": "https://cdn.enhancer.at/badge/a041…/72.webp"
+      }
+    }
+  ]
+}
 ```
+
+This is exactly what chat shows on that channel. Draw the name as `nickname`
+(or `displayName` when it is `null`), in `font`, with a glow when `glow` is
+`true`, and put the `badges` in front of it.
+
+A user can set a nickname, font and glow for one channel. Anything they did not
+set there comes from their global settings, so you never need to merge anything
+yourself.
+
+## Badges
+
+Every badge has the same fields:
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Badge ID |
+| `name` | Badge name |
+| `description` | Short text, may be empty |
+| `images` | WebP image URLs: `1x` is 18 px, `2x` is 36 px, `4x` is 72 px |
+
+The channel badge list also has `users`: how many users show the badge.
+
+## Long lists
+
+Only [Badge users](/api/badges/getBadgeUsers) returns a long list. It returns 50
+users at a time and a `nextCursor`. Pass it as `?cursor=` to get the next 50.
+`nextCursor` is `null` on the last page.
+
+## Fonts
+
+`font` is a font name from [Fonts](/api/users/getFonts). Load it with:
+
+```text
+https://fonts.enhancer.at/css2?family={font}
+```
+
+## Errors
+
+An error returns this body:
+
+```json
+{ "error": { "code": "NOT_FOUND", "message": "User not found" } }
+```
+
+- `404`: Enhancer does not know this channel, user or badge.
+- `400`: `limit` or `cursor` is not valid.
