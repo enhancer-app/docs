@@ -248,6 +248,9 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           }
@@ -520,6 +523,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -794,7 +800,7 @@
     },
     "responses": {
       "BadRequest": {
-        "description": "Invalid `limit` or `cursor`.",
+        "description": "A parameter is not valid.",
         "content": {
           "application/json": {
             "schema": {
