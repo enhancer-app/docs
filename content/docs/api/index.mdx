@@ -1,11 +1,11 @@
 ---
 title: Enhancer API
-description: Public read-only API for Enhancer channel and user data.
+description: Public read-only API for Enhancer badges, users and appearance.
 ---
 
-The **Enhancer API** provides public read-only access to channel aggregates and
-user profiles. Each endpoint page includes parameters, response schemas,
-examples and an interactive request panel.
+The **Enhancer API** gives public read-only access to Enhancer badges and to how
+users look in chat: custom nickname, font and glow. Each endpoint page includes
+parameters, response schemas, examples and an interactive request panel.
 
 ## Base URL
 
@@ -15,12 +15,85 @@ https://api.enhancer.at
 
 ## Endpoints
 
-- [Get channel aggregate](/api/channels/getChannelAggregate) - complete channel state, badges and appearance.
-- [Get user profile](/api/users/getUserProfile) - global profile data and paginated channel entries.
-- [Badge images](/api/badge-images) - CDN image URL format and size reference.
+| Endpoint | Returns |
+| --- | --- |
+| [`GET /v1/channel/{platform}/{channel}/badges`](/api/channels/getChannelBadges) | Badges of a channel, with how many accounts hold each one |
+| [`GET /v1/channel/{platform}/{channel}/users`](/api/channels/getChannelUsers) | Users with a badge or appearance in a channel |
+| [`GET /v1/channel/{platform}/{channel}/users/{user}`](/api/channels/getChannelUser) | One user as chat shows them in a channel |
+| [`GET /v1/user/{platform}/{user}/channels`](/api/users/getUserChannels) | Every channel where a user has a badge or appearance |
+| [`GET /v1/badge/{badgeId}`](/api/badges/getBadge) | One badge and its channel |
+| [`GET /v1/fonts`](/api/badges/getFonts) | Fonts allowed in `customFont` |
 
-Responses use the shared error shape:
+See [Badge images](/api/badge-images) for the image URLs in `sources`.
+
+## Parameters
+
+- `platform`: `twitch` or `kick`, in any case. Responses use `TWITCH` and `KICK`.
+- `channel`: a channel login or ID, or `global` for badges and appearance that
+  apply on every channel of the platform.
+- `user`: a user login or ID.
+
+## Global and channel scopes
+
+Every badge and appearance belongs to a scope: **global** (shown on every
+channel) or one **channel**.
+
+- **Badges.** In chat, a user shows one badge per scope: the one with the
+  highest `priority` that they did not hide, plus any badge staff pinned for
+  them. These badges have `active: true`. Other badges the user holds have
+  `active: false`. On a channel, chat shows the active global badges and the
+  active channel badges together.
+- **Appearance.** On a channel, each field of the channel appearance overrides
+  the global one. A `null` channel field means "not set", so the global value
+  is used. [Get a user in a channel](/api/channels/getChannelUser) returns the
+  merged result, with `source` telling where each value came from: `channel`,
+  `global` or `default`.
+
+## Pagination
+
+[List channel users](/api/channels/getChannelUsers) and
+[List a user's channels](/api/users/getUserChannels) return up to `limit` items
+(1-100, default 50) and a `nextCursor`. Pass it as `cursor` to get the next page. `nextCursor` is `null` on the last page.
+Treat the cursor as an opaque string.
+
+## Caching
+
+[List channel badges](/api/channels/getChannelBadges) and
+[Get a badge](/api/badges/getBadge) send an `ETag`. Send it back in
+`If-None-Match` to get `304 Not Modified` when nothing changed. Browsers do this
+on their own. The other endpoints are not cached.
+
+## Example: a user's badges on a channel
+
+To show how `igorovh` looks on the `gambit_florydy` channel, one request is
+enough:
+
+```bash
+curl https://api.enhancer.at/v1/channel/twitch/gambit_florydy/users/igorovh
+```
+
+Draw the nickname with `appearance`, and the badges with `active: true`, using
+the image URLs in `sources`. If `customFont` is set, load it from
+`https://fonts.enhancer.at/css2?family=<font>`.
+
+To list everyone who has a channel badge, get the badges once and then page
+through the users of one badge:
+
+```bash
+curl https://api.enhancer.at/v1/channel/twitch/gambit_florydy/badges
+curl "https://api.enhancer.at/v1/channel/twitch/gambit_florydy/users?badgeId=9417260b-f97e-416d-b330-0aa05bd958a1&active=true"
+```
+
+Use `global` instead of `gambit_florydy` to do the same for global badges.
+
+## Errors
+
+Errors use one shape:
 
 ```json
 { "error": { "code": "string", "message": "string" } }
 ```
+
+- `400`: invalid parameters or cursor.
+- `404`: Enhancer does not know the channel, user or badge. A known user with no
+  badges or appearance in a scope gets `200` with empty `badges`.
