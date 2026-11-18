@@ -51,8 +51,9 @@ channel) or one **channel**.
 
 ## Pagination
 
-Lists return up to `limit` items (1-100, default 50) and a `nextCursor`. Pass it
-as `cursor` to get the next page. `nextCursor` is `null` on the last page.
+[List channel users](/api/channels/getChannelUsers) and
+[List a user's channels](/api/users/getUserChannels) return up to `limit` items
+(1-100, default 50) and a `nextCursor`. Pass it as `cursor` to get the next page. `nextCursor` is `null` on the last page.
 Treat the cursor as an opaque string.
 
 ## Caching
@@ -94,4 +95,5 @@ Errors use one shape:
 ```
 
 - `400`: invalid parameters or cursor.
-- `404`: the channel, user or badge does not exist.
+- `404`: Enhancer does not know the channel, user or badge. A known user with no
+  badges or appearance in a scope gets `200` with empty `badges`.

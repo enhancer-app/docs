@@ -193,7 +193,7 @@
             "name": "active",
             "in": "query",
             "required": false,
-            "description": "With `true`, only accounts that currently show the badge (or, without `badgeId`, any badge of the scope).",
+            "description": "With `true`, only accounts that currently show the badge (or, without `badgeId`, any badge of the scope). `false` is the same as leaving it out: no filter.",
             "schema": {
               "type": "boolean"
             }
@@ -245,7 +245,7 @@
         "tags": ["Channels"],
         "operationId": "getChannelUser",
         "summary": "Get a user in a channel",
-        "description": "Returns one user as chat shows them in the channel: global and channel badges with `active`, and the appearance merged field by field. Use `global` as the channel for the global view. A user with nothing set returns empty badges and default appearance.",
+        "description": "Returns one user as chat shows them in the channel: global and channel badges with `active`, and the appearance merged field by field. Use `global` as the channel for the global view. Returns `404` when the user or the channel is unknown to Enhancer. A known user with nothing set in that scope returns `200` with empty `badges` and default appearance.",
         "parameters": [
           {
             "name": "platform",
@@ -357,7 +357,7 @@
         "tags": ["Users"],
         "operationId": "getUserChannels",
         "summary": "List a user's channels",
-        "description": "Lists every context where the user has a badge or an appearance: the global context first (`channel: null`), then channels. Appearance is the user's own setting in that context, not merged; `null` fields inherit.",
+        "description": "Returns `404` when the user is unknown to Enhancer. Lists every context where the user has a badge or an appearance: the global context first (`channel: null`), then channels. Appearance is the user's own setting in that context, not merged; `null` fields inherit.",
         "parameters": [
           {
             "name": "platform",
@@ -740,7 +740,7 @@
           },
           "holderCount": {
             "type": "integer",
-            "description": "Accounts that hold the badge."
+            "description": "All accounts that hold the badge, whether they show it (`active`) or not."
           }
         }
       },

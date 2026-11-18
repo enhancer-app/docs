@@ -1,8 +1,9 @@
 ---
 title: List a user's channels
-description: "Lists every context where the user has a badge or an appearance:
-  the global context first (`channel: null`), then channels. Appearance is the
-  user's own setting in that context, not merged; `null` fields inherit."
+description: "Returns `404` when the user is unknown to Enhancer. Lists every
+  context where the user has a badge or an appearance: the global context first
+  (`channel: null`), then channels. Appearance is the user's own setting in that
+  context, not merged; `null` fields inherit."
 full: true
 _openapi:
   preload:
@@ -13,9 +14,10 @@ _openapi:
   structuredData:
     headings: []
     contents:
-      - content: "Lists every context where the user has a badge or an appearance: the
-          global context first (`channel: null`), then channels. Appearance is
-          the user's own setting in that context, not merged; `null` fields
+      - content: "Returns `404` when the user is unknown to Enhancer. Lists every
+          context where the user has a badge or an appearance: the global
+          context first (`channel: null`), then channels. Appearance is the
+          user's own setting in that context, not merged; `null` fields
           inherit."
 ---
 
