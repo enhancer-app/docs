@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { Provider } from '@/components/provider';
 import './global.css';
 
@@ -26,6 +27,12 @@ export default function Layout({ children }: LayoutProps<'/'>) {
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
         <Provider>{children}</Provider>
+        <Script
+          src="https://umami.igor.ovh/script.js"
+          data-website-id="4882a0ff-21a8-45bc-a02a-288a180aec27"
+          data-domains="docs.enhancer.at"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
