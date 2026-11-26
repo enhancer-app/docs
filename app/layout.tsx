@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import { Provider } from '@/components/provider';
+import { siteUrl } from '@/lib/shared';
 import './global.css';
 
 const inter = Inter({
@@ -9,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://enhancer-docs.pages.dev'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: 'Enhancer Docs',
     template: '%s - Enhancer Docs',
