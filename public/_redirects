@@ -1,0 +1,6 @@
+# Old URLs that still get search traffic.
+/faq /general/faq/ 301
+/faq/ /general/faq/ 301
+/docs / 301
+/docs/* /:splat 301
+/features/* https://enhancer.at/#features 301
